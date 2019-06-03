@@ -1,0 +1,19 @@
+[
+    { "tag" : "json"   , "url": "config/app.json"          }, 
+    { "tag" : "icon"   , "url": "ui/img/favicon.ico"       },
+    { "tag" : "link"   , "url": "sys/core/webix/webix.css" },
+    { "tag" : "link"   , "url": "ui/css/font_awesome/css/font-awesome.min.css"   },  
+    { "tag" : "link"   , "url": "ui/css/sidebar.css"       }, 
+    { "tag" : "link"   , "url": "ui/css/waves.css"         },  
+    { "tag" : "script" , "url": "sys/core/webix/webix.js"  }, 
+    { "tag" : "script" , "url": "sys/core/b64.js"          },
+    { "tag" : "script" , "url": "sys/core/helper.js"       },
+    { "tag" : "script" , "url": "sys/core/noback.js"       },  
+    { "tag" : "script" , "url": "sys/core/waves.js"        },   
+    { "tag" : "script" , "url": "sys/plugins/sidebar.js"   },   
+    { "tag" : "script" , "url": "sys/plugins/mainbar.js"   },   
+    { "tag" : "script" , "url": "sys/plugins/datalist.js"  },   
+    { "tag" : "script" , "url": "sys/plugins/formview.js"  },    
+    { "tag" : "script" , "url": "sys/plugins/cards.js"     },  
+    { "tag" : "script" , "url": "app/main.js"              }  
+]

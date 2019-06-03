@@ -1,0 +1,53 @@
+.logout
+{
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+
+
+.logout .webix_win_head>.webix_view>.webix_template
+{
+    background: white;
+    color:rgba(0,0,0,.87);
+    box-shadow: none;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+    font-weight: 400;
+    text-align: left;
+    padding-left: 20px;
+    line-height: 70px;
+}
+
+.logout .webix_win_head
+{
+    border-bottom:1px solid transparent;
+}
+
+.logout .message div
+{
+    color: rgba(0,0,0,.35);
+}
+
+.logout .webix_el_button .webix_el_box button
+{
+    background: transparent;
+    color: @toolbar_bg;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 0;
+    border: 1px solid transparent;
+}
+
+.logout .webix_el_button .webix_el_box button:active
+{
+    box-shadow: none;
+}
+
+.logout-modal
+{
+
+
+
+opacity:.75;
+}

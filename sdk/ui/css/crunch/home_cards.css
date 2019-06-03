@@ -1,0 +1,83 @@
+.webix_dashcard,
+.webix_dashcard .webix_template
+{
+    background: transparent;
+}
+
+.card_home
+{
+    width  : calc( 100% - 3px);
+    height : calc( 100% - 3px);
+    padding: 48px 32px; 
+    background: #fff;
+}
+
+.card_home .icon
+{
+    width        : 82px  ;
+    margin-left  : auto  ;
+    margin-right : auto  ;
+    text-align   : center;    
+}
+
+.card_home .values
+{
+    padding-left : 10px;
+}
+
+.card_home .values h3
+{
+    font-size     : 34px;
+    line-height   : 40px;
+    margin-top    : 0   ;
+    margin-bottom : 10px;
+}
+
+.card_home .values p
+{
+    margin-top    : 0;
+    margin-bottom : 0;
+    font-weight   : normal;
+    font-size     : 14px;
+}
+
+.card_home .webix_icon
+{
+    font-size : 30px;
+}
+
+.card_red .webix_icon
+{
+    color: white;
+}
+
+.card_red .icon
+{
+    background   : #e53a36;
+    box-shadow   : 0px 9px 19px -9px rgba(229, 58, 54, 0.65);
+    border-radius: 3px;
+}
+
+.card_green .webix_icon
+{
+    color: white;
+}
+
+.card_green .icon
+{
+    background   : #4ca74f;
+    box-shadow   : 0px 9px 19px -9px rgba(76, 167, 79, 0.65);
+    border-radius: 3px;
+}
+
+.card_orange .webix_icon
+{
+    color: white;
+}
+
+.card_orange .icon
+{
+    background   : #fea11d;
+    box-shadow   : 0px 9px 19px -9px rgba(254, 161, 29, 0.65);
+    border-radius: 3px;
+}

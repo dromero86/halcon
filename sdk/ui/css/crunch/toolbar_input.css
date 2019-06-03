@@ -1,0 +1,30 @@
+
+@toolbar_selector .input-text div input
+{
+    margin-top            : 10px;
+    border                : none;
+    height                : 40px;
+    background            : @toolbar_input_bg;
+    padding               : 5px 20px;
+    -webkit-border-radius : 3px;
+    -moz-border-radius    : 3px;
+    -ms-border-radius     : 3px;
+    -o-border-radius      : 3px;
+    border-radius         : 3px;
+    font-weight           : 400;
+    font-size             : 13px;
+    color                 : #fff;
+}
+
+@toolbar_selector .webix_inp_static:focus, 
+@toolbar_selector input[type=text]:focus
+{
+    border-color: transparent;
+}
+
+@toolbar_selector input[type=text]::-webkit-input-placeholder { color: #fff; }
+@toolbar_selector input[type=text]:-moz-placeholder           { color: #fff; opacity: 1; }
+@toolbar_selector input[type=text]::-moz-placeholder          { color: #fff; opacity: 1; }
+@toolbar_selector input[type=text]:-ms-input-placeholder      { color: #fff; }
+@toolbar_selector input[type=text]::-ms-input-placeholder     { color: #fff; }
+@toolbar_selector input[type=text]::placeholder               { color: #fff; }

@@ -1,0 +1,49 @@
+
+.form-view .webix_before_all_tabs,
+.form-view .webix_after_all_tabs
+{
+    height: 0 !important;
+}
+
+.form-view .webix_all_tabs 
+{
+    background: @toolbar_bg;
+}
+
+.form-view div.webix_item_tab
+{
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.form-view .webix_item_tab
+{
+    background: transparent;
+    border-radius: 0;
+    border:1px solid transparent;
+    user-select: none;
+}
+
+.form-view .webix_item_tab.webix_selected
+{
+    background: transparent;
+    border-radius: 0;
+    border:1px solid transparent;
+    border-bottom: 2px solid @body_bg;
+}
+
+.webix_tab_filler
+{ 
+    border-radius: 0;
+    border:1px solid transparent;
+}
+
+
+.webix_view a.webix_list_item:focus, 
+.webix_view div:focus, 
+.webix_view span:focus, 
+.webix_view.webix_window:focus {
+    outline-color: transparent; 
+    outline-style: dotted;    
+    outline-width: 0px;
+}

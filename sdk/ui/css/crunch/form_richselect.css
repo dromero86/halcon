@@ -1,0 +1,64 @@
+/*combo*/
+
+.form-view .webix_el_richselect
+{
+    background: #e8e8e8;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px 
+    
+}
+
+.form-view .webix_el_richselect .webix_el_box 
+{
+    padding: 0;
+}
+
+.form-view .webix_el_richselect .webix_el_box .webix_inp_static
+{
+    background: transparent;
+    border-radius: 0;
+    border:none;
+    border-bottom:2px solid #9a9a9a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-view .webix_el_richselect .webix_el_box .webix_input_icon
+{
+    background: transparent;
+    color: @toolbar_bg;
+}
+
+.form-view .webix_el_richselect  .webix_inp_top_label
+{
+    font-size: 10px;
+    color:#5e5e5e;
+    padding-left: 10px;
+}
+
+.form-view .webix_el_richselect .webix_el_box .webix_inp_static:focus
+{
+    box-shadow: none;
+    border-bottom:2px solid @toolbar_bg;
+}
+
+.form-view .webix_el_richselect .webix_el_box input
+{
+    background: transparent;
+    border-radius: 0;
+    border:none;
+    border-bottom:2px solid #9a9a9a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.form-view .webix_el_richselect .webix_el_box input:focus
+{
+    box-shadow: none;
+}
+
+.form-view .webix_el_richselect:focus-within label
+{
+    color: @toolbar_bg; 
+}

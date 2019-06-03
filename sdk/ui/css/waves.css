@@ -1,0 +1,51 @@
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+.waves
+{
+  background: rgba(255, 255, 255, .5);
+  opacity: 0;
+  border-radius: 200%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+  animation: ripple 1s ease-out;
+}
+
+.waves-dark
+{
+  background: rgba(0, 0, 0, .5);
+}
+
+.waves-blue
+{
+  background: rgba(33, 150, 243, .5);
+}
+
+
+.waves-container
+{
+  z-index:999; 
+  position:absolute;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; 
+  will-change: opacity, transform;
+}

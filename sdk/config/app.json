@@ -1,0 +1,27 @@
+{
+	"name"    : "HALCON",
+	"jsonp"   : false,
+	"domain"  : "",
+    "preview" : "", 
+    "session" :
+    {
+        "enable" : true,
+        "login"  : "auth-login"  ,
+        "check"  : "auth-online" ,
+        "logout" : "auth-logout" ,
+        "key"    : "halcon.app.session" 
+    },
+
+    "menu":
+    [
+        {   
+            "value": "Menú", 
+            "icon" : "desktop",
+            "open" : true,
+            "data" :
+            [  
+                { "id": "app.abm.clientes_view" , "value":"Clientes" }
+            ] 
+        }
+    ]
+}

@@ -1,0 +1,79 @@
+/*input checkbox*/
+
+.form-view .webix_el_checkbox
+{
+    background: #e8e8e8;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px: 
+    
+}
+
+.form-view .webix_el_checkbox .webix_el_box 
+{
+    padding: 0;
+}
+
+.form-view .webix_el_checkbox .webix_el_box input
+{
+    background: transparent;
+    border-radius: 0;
+    border:none;
+    border-bottom:2px solid #9a9a9a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-view .webix_el_checkbox  .webix_inp_top_label
+{
+    font-size: 10px;
+    color:#5e5e5e;
+    padding-left: 10px;
+}
+
+.form-view .webix_el_checkbox .webix_el_box input:focus
+{
+    box-shadow: none;
+    border-bottom:2px solid @toolbar_bg;
+}
+
+.form-view .webix_el_checkbox:focus-within label
+{
+    color: @toolbar_bg; 
+}
+
+
+.form-view .webix_el_checkbox .webix_custom_checkbox
+{
+    margin-left: 10px;   
+    border-radius: 0px;
+    box-shadow: none;
+    border: 2px solid rgba(0, 0, 0, 0.54);
+    height: 18px;
+    width: 18px;
+}
+
+
+.form-view .webix_el_checkbox .webix_custom_checkbox:before
+{
+    background: @toolbar_bg;
+    color: white;
+    font-size: 13px;
+}
+
+.form-view .webix_el_checkbox a:active .webix_custom_checkbox, 
+.form-view .webix_el_checkbox a:focus .webix_custom_checkbox
+{
+    box-shadow: none;
+    border: 2px solid @toolbar_bg;
+}
+
+.form-view .webix_el_checkbox .webix_checkbox_1 .webix_custom_checkbox
+{
+   border: 2px solid @toolbar_bg;
+}
+
+.form-view .webix_el_checkbox .webix_inp_checkbox_border 
+{
+    border-bottom: 1px solid #9a9a9a;
+    height: calc(95% - 1px);
+}
