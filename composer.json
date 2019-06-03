@@ -1,0 +1,20 @@
+{
+    "name": "dromero86/halcon",
+    "description": "Backend for tero",
+    "type": "project",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "homepage": "https://github.com/dromero86/halcon",
+    "authors": [
+        {
+            "name": "Daniel Romero",
+            "email": "dromero@ymail.com",
+            "homepage": "https://github.com/dromero86/halcon/",
+            "role": "Original Developer"
+        }
+    ],
+    "require": 
+	{ 
+        "composer/installers": "~1.0"
+    }
+}
