@@ -126,7 +126,7 @@ Editar el archivo sdk/config/app.json
 	"domain"  : "el servidor donde esta alojada la aplicacion",  
 	"session" :
 	{
-		"enable" : false,
+		"enable" : false, //si es true se habilita la session
 		"login"  : "la url de autenticacion"  ,
 		"check"  : "la url que checquea si esta con session activa" ,
 		"logout" : "la url de deslogueo" ,
