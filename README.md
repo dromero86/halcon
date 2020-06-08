@@ -26,6 +26,7 @@ Halcon esta escrito en javascript para soportar [Webix 5.4](https://webix.com/)
 - [x] Evitar el cache agregando el parametro extra "refresh=hash()"
 - [x] Detectar el dispositivo para ajustarse a la visualizacion
 - [x] Generar metodos helper de url como base_url, req, GET, POST entre otros.
+- [x] Mostrar path con el stilo de java "sdk.my_dir.my_other_dir"  
 
 ### Vincular Halcon con Halcon
 
@@ -38,6 +39,8 @@ $App->get('index', function ()
 ```
 
 ### Configurar los sources 
+
+Editar el archivo sdk/config/sources.json
 
 ```js
 [
@@ -60,4 +63,54 @@ $App->get('index', function ()
     { "tag" : "script" , "url": "sys/plugins/cards.js"     },  
     { "tag" : "script" , "url": "app/main.js"              }  
 ]
+```
+
+### Definir un modulo 
+
+```js
+//defino un modulo javascript en la ruta sdk/app/settings/main.js
+app.define("app.settings.main", function()
+{ 
+	//mi codigo javascript
+
+});
+```
+
+### Invocar un modulo 
+
+```js
+ 
+	app.require("app.settings.main", function()
+	{ 
+		//cuando sdk/app/settings/main.js este cargada se invocara esta funcion
+
+	});
+```
+
+### Definir un modulo que retorne un valor
+
+```js
+//defino un modulo javascript en la ruta sdk/app/settings/main.js
+app.define("app.settings.main", function()
+{ 
+	var persona = {
+		nombre:"John Doe",
+		edad: 35
+	};
+	
+	return persona;
+});
+```
+
+### Invocar un modulo que retorna un valor
+
+```js
+ 
+app.require("app.settings.main", function(persona)
+{ 
+	//cuando sdk/app/settings/main.js este cargada se invocara esta funcion
+	
+	console.log(persona); // { "nombre": "John Doe", "edad":35 }
+
+});
 ```
