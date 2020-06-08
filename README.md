@@ -114,3 +114,23 @@ app.require("app.settings.main", function(persona)
 
 });
 ```
+
+### Configurar la aplicacion
+
+Editar el archivo sdk/config/app.json
+
+```js
+{
+	"name"    : "El nombre de la aplicacion",
+	"jsonp"   : false, 
+	"domain"  : "el servidor donde esta alojada la aplicacion",  
+	"session" :
+	{
+		"enable" : false,
+		"login"  : "la url de autenticacion"  ,
+		"check"  : "la url que checquea si esta con session activa" ,
+		"logout" : "la url de deslogueo" ,
+		"key"    : "la clave de localstorage" 
+	} 
+}
+```
