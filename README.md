@@ -20,12 +20,12 @@ Halcon esta escrito en javascript para soportar [Webix 5.4](https://webix.com/)
 
 #### Tareas de Halcon
 
-[x] Gestionar la carga secuencial de recursos js, css, json, ico, jpg, png, gif, svg.
-[x] Actuar como "Module loader" de recursos js simil [RequireJS](https://requirejs.org/) 
-[x] Generar un preloading mientras se cargan los recursos
-[x] Evitar el cache agregando el parametro extra "refresh=hash()"
-[x] Detectar el dispositivo para ajustarse a la visualizacion
-[x] Generar metodos helper de url como base_url, req, GET, POST entre otros.
+- [x] Gestionar la carga secuencial de recursos js, css, json, ico, jpg, png, gif, svg.
+- [x] Actuar como "Module loader" de recursos js simil [RequireJS](https://requirejs.org/) 
+- [x] Generar un preloading mientras se cargan los recursos
+- [x] Evitar el cache agregando el parametro extra "refresh=hash()"
+- [x] Detectar el dispositivo para ajustarse a la visualizacion
+- [x] Generar metodos helper de url como base_url, req, GET, POST entre otros.
 
 ### Vincular Halcon con Halcon
 
