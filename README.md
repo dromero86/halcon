@@ -164,3 +164,34 @@ if($App->session->recv() !=FALSE )
     });
 }
 ```
+
+### Configurar el table list
+
+Crear el archivo sdk/app/abm/personas_view.js
+Debe tener una tabla llamada personas
+
+```js
+app.define("app.abm.personas_view",function()
+{  
+    webix.ui
+    ({
+        id     : 'content'  ,
+        view   : "datalist" ,
+        title  : "TITULO DEL ABM" ,
+        form   : "app.abm.personas_form", //vinculo para cuando seleccione un registro o cuando agregue uno nuevo
+        store  : "objeto_interno_con_el_nombre_de_tabla" ,
+        columns: [ 
+            {id:"nombre"  , header:"Nombre" , sort: 'string' , fillspace: true }, 
+            {id:"edad"    , header:"Edad"   , sort: 'string' , adjust: true }                
+        ],
+        query : { 
+            select:
+            {
+                from:"clientes", 
+                field: [ "id","nombre","edad" ]  
+            } 
+        } 
+    },
+    $$('content'));
+});
+```
