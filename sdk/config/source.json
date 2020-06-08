@@ -5,6 +5,7 @@
     { "tag" : "link"   , "url": "ui/css/font_awesome/css/font-awesome.min.css"   },  
     { "tag" : "link"   , "url": "ui/css/sidebar.css"       }, 
     { "tag" : "link"   , "url": "ui/css/waves.css"         },  
+    { "tag" : "link"   , "url": "ui/css/admin.css"         }, 
     { "tag" : "script" , "url": "sys/core/webix/webix.js"  }, 
     { "tag" : "script" , "url": "sys/core/b64.js"          },
     { "tag" : "script" , "url": "sys/core/helper.js"       },

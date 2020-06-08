@@ -1,5 +1,7 @@
 app.define("app.dashcenter", function()
-{ 
+{  
+    __.setTitle("Bienvenido");
+
     webix.ui
     ({
         id      : "content", 

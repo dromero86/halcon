@@ -5,7 +5,7 @@
     "preview" : "", 
     "session" :
     {
-        "enable" : true,
+        "enable" : false,
         "login"  : "auth-login"  ,
         "check"  : "auth-online" ,
         "logout" : "auth-logout" ,

@@ -51,7 +51,7 @@ app.define("sys.widget.logout",function()
 						        {  
 						            __.session.on.logout(); 
 
-                                    $$("_exit").destructor();
+                                    $$("_exit").close();
 
                                     location.reload();
 						        }); 

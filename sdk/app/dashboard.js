@@ -70,6 +70,8 @@ app.define("app.dashboard",function()
                 { 
                     if( __.isNumber(id)) return; 
 
+                    $$("my_pop").hide();
+
                     app.require( this.getItem(id).id );
                 } 
             }            

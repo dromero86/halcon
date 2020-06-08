@@ -1,8 +1,8 @@
 app.define("sys.widget.account",function()
 {
-    app.changeUri("sys.widget.account");
+    __.changeUri("sys.widget.account");
 
-    app.setTitle("Mi cuenta - "+app.name);
+    __.setTitle("Mi cuenta");
 
     webix.ui
     ({
@@ -37,7 +37,7 @@ app.define("sys.widget.account",function()
                                     borderless: true         ,
                                     click     : function()
                                     {
-                                        app.require("cms.sys.dash");
+                                        app.require("app.dashcenter");
                                     }
                                 },
                                 {
@@ -56,10 +56,10 @@ app.define("sys.widget.account",function()
                                     hotkey    : "Ctrl+S",
                                     click     : function()
                                     {
-                                        window.post({"action": "update-cuenta"}, $$("form_cuenta").getValues(), function(o)
+                                        __.POST({"action": "update-cuenta"}, $$("form_cuenta").getValues(), function(response)
                                         {
                                             webix.message("Actualizado exitosamente");
-                                            app.require("ui.sys.dashboard");
+                                            app.require("app.dashcenter");
                                         });
                                     }
                                 }
@@ -68,7 +68,7 @@ app.define("sys.widget.account",function()
                         {
                             id      : "form_cuenta",
                             view    : "form",
-                            url     : req({"action": "request-account"}),
+                            url     : __.req({"action": "request-account"}),
                             elements:
                             [
                                 { template:"<b>Informacion Basica</b>", type:"section"},

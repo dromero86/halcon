@@ -42,7 +42,7 @@ app.define("app.settings.main", function()
                 cols:
                 [
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -51,7 +51,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25   },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -60,7 +60,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -69,7 +69,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -83,7 +83,7 @@ app.define("app.settings.main", function()
                 cols:
                 [
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -92,7 +92,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25   },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -101,7 +101,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -110,7 +110,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -124,7 +124,7 @@ app.define("app.settings.main", function()
                 cols:
                 [
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -133,7 +133,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25   },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -142,7 +142,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
@@ -151,7 +151,7 @@ app.define("app.settings.main", function()
                     },
                     { width: 25  },
                     {
-                        view   : "dashcard", 
+                        view   : "cards", 
                         color  : "red",
                         icon   : "dashboard",
                         value  : "$ 2345",
