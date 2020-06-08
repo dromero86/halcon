@@ -134,3 +134,33 @@ Editar el archivo sdk/config/app.json
 	} 
 }
 ```
+
+### Como configurar la session 
+
+- [x] Debe establecer en sdk/config/app.json session.enable = true;
+- [x] Para customizar el widget del login debe editar "sys.widget.login"
+- [x] Para customizar el widget del logout debe editar "sys.widget.logout"
+- [x] Para obtener el objeto session utlice el helper "__.userInfo();"
+
+### Como crear abms en 2 pasos
+
+Para utilizar esta caracteristica debe tener instalado y configurado en Tero
+
+- [x] Database
+- [x] Telepatia
+- [x] Schema
+
+y tener creado el controlador "databot"
+
+
+```php
+if($App->session->recv() !=FALSE )
+{ 
+    $App->schema->load();
+
+    $App->get("databot", function($rid="")
+    {   
+        $this->schema->start_server(); 
+    });
+}
+```
