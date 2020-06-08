@@ -79,12 +79,12 @@ app.define("app.settings.main", function()
 ### Invocar un modulo 
 
 ```js
- 
-	app.require("app.settings.main", function()
-	{ 
-		//cuando sdk/app/settings/main.js este cargada se invocara esta funcion
 
-	});
+app.require("app.settings.main", function()
+{ 
+	//cuando sdk/app/settings/main.js este cargada se invocara esta funcion
+
+});
 ```
 
 ### Definir un modulo que retorne un valor
