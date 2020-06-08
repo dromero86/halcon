@@ -28,7 +28,7 @@ Halcon esta escrito en javascript para soportar [Webix 5.4](https://webix.com/)
 - [x] Generar metodos helper de url como base_url, req, GET, POST entre otros.
 - [x] Mostrar path con el stilo de java "sdk.my_dir.my_other_dir"  
 
-### Vincular Halcon con Halcon
+### Vincular Halcon con Tero
 
 ```php
 $App->get('index', function ()
