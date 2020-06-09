@@ -149,6 +149,7 @@ Para utilizar esta caracteristica debe tener instalado y configurado en Tero
 - [x] Database
 - [x] Telepatia
 - [x] Schema
+- [x] Controladores de abm.php (*-update, *-row)
 
 y tener creado el controlador "databot"
 
@@ -193,5 +194,55 @@ app.define("app.abm.personas_view",function()
         } 
     },
     $$('content'));
+});
+```
+
+### Configurar el table form
+
+Crear el archivo sdk/app/abm/personas_form.js
+
+
+```js
+app.define("app.abm.personas_form",function()
+{  
+    webix.ui
+    ({
+        id       : 'content',
+        view     : "formview",
+        dataview : "app.abm.personas_view",
+        update   : "personas-update",
+        source   : {"action": "personas-row","id": __.defAttr("personas", 0, "id" ) }, 
+        store    : "personas",
+        title_set: __.defAttr("personas", "", "nombre" ),
+        title_add: "NUEVA PERSONA",
+        elements :
+        {
+            padding:25,
+            rows:
+            [ 
+                {
+                    cols:
+                    [
+                        {
+                            "name": "nombre",
+                            "view": "text",
+                            "label": "Nombre",
+                            "labelPosition": "top"
+                        },
+                        { width: 25 },
+                        {
+                            "name": "edad",
+                            "view": "text",
+                            "label": "Edad",
+                            "labelPosition":"top"
+                        }    
+                    ] 
+                },
+		{}  
+            ]
+        } 
+    },
+    $$('content'));
+
 });
 ```
