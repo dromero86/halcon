@@ -1,16 +1,14 @@
 app.define("app.abm.clientes_form",function()
-{  
-
+{   
     webix.ui
     ({
         id       : 'content',
         view     : "formview",
         dataview : "app.abm.clientes_view",
         update   : "clientes-update",
-        source   : {"action": "clientes-row","id": ( __.current["clientes"] != undefined ? __.current["clientes"].id : 0 ) },
-        
+        source   : {"action": "clientes-row","id":  __.defAttr("clientes", 0, "id" )  }, 
         store    : "clientes",
-        title_set: __.current["clientes"] != undefined ? __.current["clientes"].cliente : "",
+        title_set: __.defAttr("clientes", "", "cliente" ),
         title_add: "NUEVO CLIENTE",
         elements :
         {
