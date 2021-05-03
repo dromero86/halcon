@@ -1,12 +1,9 @@
 app.define("app.dashcenter", function()
 {  
     __.setTitle("Bienvenido");
-
     webix.ui
     ({
-        id      : "content", 
-        width   : '100%' ,
-        height  : 'auto' , 
+        id      : "content",  
         type    : "space", 
         borderless: true,
         rows:
@@ -16,40 +13,42 @@ app.define("app.dashcenter", function()
                 css:"spacer" ,
                 cols:
                 [
-                    { width: 10, css:"spacer" },
+                    { width: 20, css:"spacer" },
                     {
                         rows:
                         [
-                            { template:"<div class='notify'>Like what you see? Check out our premium version for more.</div>", css:"shadow", height:85 },
-                            { height: 30, css:"spacer" },
+                            { template:"<div class='notify'>Like what you see? this is a preliminar version of work.</div>", css:"shadow", height:85 },
+                            { height: 20, css:"spacer" },
                             {
+                                height: 160,
                                 cols:
                                 [
-                                    { css:"shadow", height:180, template:"<table class='card_home card_red'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" },
+                                    { id:"_vehiculos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"ticket", value:123, label:"Eventos" },
                                     { width: 30, css:"spacer" },
-                                    { css:"shadow", height:180, template:"<table class='card_home card_green'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" },
+                                    { id:"_personal", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"address-book", value:123, label:"Invitados"  },
                                     { width: 30, css:"spacer" },
-                                    { css:"shadow", height:180, template:"<table class='card_home card_orange'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" }
+                                    { id:"_mantenimientos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"shopping-bag", value:123, label:"Productos" }
                                 ]
                             },
-                            { height: 30, css:"spacer" },
+                            { height: 20, css:"spacer" },
                             {
+                                height: 160,
                                 cols:
                                 [
-                                    { css:"shadow", height:180, template:"<table class='card_home card_red'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" },
+                                    { id:"_arribos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"truck", value:123, label:"Distribuidoras" },
                                     { width: 30, css:"spacer" },
-                                    { css:"shadow", height:180, template:"<table class='card_home card_green'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" },
+                                    { id:"_barcos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"flag", value:123, label:"Paises"  },
                                     { width: 30, css:"spacer" },
-                                    { css:"shadow", height:180, template:"<table class='card_home card_orange'> <tr>  <td class='icon'> <span class='webix_icon webix_sidebar_icon fa-desktop'></span> </td> <td class='values'> <h3>$ 2344</h3> <p>New Projects</p> </td>  </tr>  </table>" }
+                                    { id:"_servicios", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"shopping-cart", value:123, label:"Pedidos" }
                                 ]
                             },
                             { css:"spacer" }
                         ]
-                    },
-                    
-                    { width: 10, css:"spacer" }
+                    }, 
+                    { width: 20, css:"spacer" }
                 ] 
-            }
+            },
+            {css:"spacer"}
         ]
     }, $$("content")); 
  

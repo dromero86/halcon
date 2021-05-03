@@ -6,7 +6,7 @@
  
     this.__loader = 
     { 
-        version      : "2.1-production"    ,
+        version      : "2.2-production"    ,
         name         : ""    ,
         loaded       : 0     , 
         stack        : []    , 
@@ -28,7 +28,7 @@
         require_force: true  , 
         autorefresh  : true  , 
         log_internal : false  ,
-        cssLoader    : "overflow: hidden; border:0; margin:0; padding:0;box-sizing: border-box; background-image: url('#url#sdk/ui/img/loader.svg'); background-attachment: fixed; height: 100%;width: 100%; height: 100vh;width: 100vw; background-position: center center; background-repeat: no-repeat;  ",
+        cssLoader    : "overflow: hidden; border:0; margin:0; padding:0;box-sizing: border-box; background-color: #1C2B2D; background-image: url('#url#sdk/ui/img/onseller-dark.png?id=1'); background-size:25%; background-attachment: fixed; height: 100%;width: 100%; height: 100vh;width: 100vw; background-position: center center; background-repeat: no-repeat; transition: all .5s ease; ",
         iphoneDevice : function() 
         {
             var iDevices = [
@@ -194,7 +194,7 @@
                     if(item == undefined) that.finalize();
                     that.log("sys.core.loader",  "stairs ("+that.source.length+") " + that.getModule(item.url) );
  
-                    that.load(item.tag,  item.url,  that.source.length == 0 ? that.finalize :  fn);    
+                    that.load(item.tag,  item.url, item.cache!= undefined ? item.cache : true ,  that.source.length == 0 ? that.finalize :  fn);    
                 };
                 fn(); 
             };
@@ -210,16 +210,31 @@
 
             return runnable;
         },
-        load : function( tag,  url, callback)
-        {
+        load : function( tag, url, cache, callback)
+        {  
             var that = this;
             that.loaded++;  
             that.stack.push(url);
             that.current = url;
+
             switch(tag)
             {
+                case "template"  : 
+
+                    that.ajax_native(that.project_url() + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash():"" ), function(responseText){
+ 
+                        var modulo = app.getModule(url);
+
+                        __.templates[modulo]=responseText;
+
+                        callback();
+                    }); 
+
+                break;
+
+
                 case "json":
-                    that.ajax_native(that.project_url() + url + ( that.force == true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash():"" ), function(responseText){
+                    that.ajax_native(that.project_url() + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash():"" ), function(responseText){
                         var json = eval('('+responseText+')');
                         for(var i in json)
                         { 
@@ -231,7 +246,7 @@
                 case "icon":
                     var e = document.createElement("link");
                     that.setDomAttribute(e, "rel", "shortcut icon"); 
-                    e.href = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( that.force == true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );
+                    e.href = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );
                   
                     document.getElementsByTagName("head")[0].appendChild(e);
                     callback();
@@ -280,8 +295,8 @@
                     {   
                         e.onload = that.bootcallback(e, callback);
                     } 
-                    if( tag == "script" ) e.src   = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( that.force == true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );
-                    if( tag == "link"   ){ e.href = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( that.force == true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );  e.rel = "stylesheet"; }
+                    if( tag == "script" ) e.src   = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );
+                    if( tag == "link"   ){ e.href = ( url.indexOf("//")>-1 ? "" : that.project_url() ) + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash() :"" );  e.rel = "stylesheet"; }
                     document.getElementsByTagName("head")[0].appendChild(e);
                 break;
  

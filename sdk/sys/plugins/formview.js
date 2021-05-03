@@ -3,8 +3,9 @@ webix.protoUI
     name  : 'formview',
     $init : function(config) 
     { 
-        config.width   = "100%"     ;
-        config.height  = "auto"     ;
+        var _that =  this;
+ 
+        var default_back = function(){ app.require(config.dataview);};                    
         config.type    = "space"    ;
         config.css     = "form-view";
         config.rows    =
@@ -29,24 +30,23 @@ webix.protoUI
                             {
                                 view      : "button"       , 
                                 type      : "icon"         , 
-                                icon      : "chevron-left" ,
+                                icon      : "fa fa-chevron-left" ,
                                 css       : "app_button"   ,  
                                 width     : 45             , 
                                 align     : "center"       , 
                                 borderless: true           ,
-                                click     : function()
-                                { 
-                                    app.require(config.dataview);
-                                }                    
+                                click     : config.back != undefined ? config.back : default_back
                             },
-                            { id : config.store+"_title", view  : "label" }, 
+                            { id : config.store+"_title", view  : "label" },
                             { id : config.store+"_extra", width : 1       },
+                            { id : config.store+"_fecha", width : 1       }, 
                             {
                                 id        : config.store+"_btn",
                                 go        : config             ,
+                                root      : _that              ,
                                 view      : "button"           , 
                                 type      : "icon"             , 
-                                icon      : "save"             , 
+                                icon      : "fa fa-save"             , 
                                 align     : "center"           , 
                                 css       : "app_button"       , 
                                 borderless: true               ,
@@ -54,12 +54,16 @@ webix.protoUI
                                 width     : 56                 ,
                                 click     : function()
                                 { 
+                                    var that   = this.config.root; 
+
                                     var config = this.config.go; 
 
                                     if(config.validate!=undefined)
                                     {
                                         if( $$(config.store+"_form").validate() && config.validate==true )
                                         {
+                                            that.callEvent("onFormSubmmited", [__.getFormPost(config.store+"_form")]);  
+
                                             __.sendPost({"action":config.update}, __.getFormPost(config.store+"_form") , config.dataview); 
                                         }
                                         else 
@@ -69,6 +73,8 @@ webix.protoUI
                                     }
                                     else
                                     {
+                                        that.callEvent("onFormSubmmited", [__.getFormPost(config.store+"_form")]);  
+
                                         __.sendPost({"action":config.update}, __.getFormPost(config.store+"_form") , config.dataview); 
                                     }  
                                 }                    

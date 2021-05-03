@@ -16,7 +16,7 @@ Halcon is a ui web framework for Javascript thought for the simple writing and f
 
 ### About Halcon
 
-Halcon esta escrito en javascript para soportar [Webix 5.4](https://webix.com/)  
+Halcon esta escrito en javascript para soportar [Webix 7+](https://webix.com/)  
 
 #### Tareas de Halcon
 

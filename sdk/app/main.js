@@ -1,5 +1,7 @@
 app.run(function()
 {  
+    webix.i18n.setLocale("es-ES");
+	
 	webix.ready(function()
 	{   
 		webix.ui.fullScreen();  

@@ -1,7 +1,8 @@
 (function(){
 
     this.__ = {
-
+        firex   : {},
+        templates:{},
         current : {},
         struct  : {},
         show    : { current:'content'   , old: '' },
@@ -90,14 +91,14 @@
                     }
                     else
                     {
-                        console.log("Error", that.req(request), post, text, data);
+                        console.error(  that.req(request), post, text, data);
                     }
 
                     
                 },
                 error: function(text, data, XmlHttpRequest)
                 {
-                    console.log("Error", that.req(request), post, text, data, XmlHttpRequest);
+                    console.error( that.req(request), post, text, data, XmlHttpRequest);
                 }
             });
         },
@@ -119,14 +120,14 @@
                     }
                     else
                     {
-                        console.log("Error", that.req(request), post, text, data);
+                        console.error(  that.req(request), post, text, data);
                     }
 
                     
                 },
                 error: function(text, data, XmlHttpRequest)
                 {
-                    console.log("Error", that.req(request), post, text, data, XmlHttpRequest);
+                    console.error(  that.req(request), post, text, data, XmlHttpRequest);
                 }
             });
         },
@@ -202,9 +203,7 @@
         sendPost: function(linkto, post, viewback)
         {
             webix.ajax().post( __.req(linkto) , post, function(text, xml, xhr)
-            {  
-                console.log("webix.ajax.post", text, xml, xhr);
-
+            {    
                 var json = eval('(' + text + ')');
  
                 webix.message({type:"error", text: "actualizado correctamente"});  
@@ -221,12 +220,60 @@
             return (__.current[key]==undefined ? dnil : __.current[key][attr] );
         },  
 
-        query: function(sql, callback)
+        get_user: function()
         {
-            __.PAYLOAD({"action":"databot"}, sql , function(response)
-            {     
-                callback( JSON.parse(response) );
-            });
+            var _session = webix.storage.session.get(usr.session.key);
+
+            return _session == null ? false : _session;
+        },
+
+        SQLCombo: function(webix_id, query)
+        {
+            __.PAYLOAD
+            (
+                {"action":"databot"}, 
+                query , 
+                function(response)
+                { 
+                    var result = JSON.parse(response);  
+
+                    $$(webix_id).define("options", result.data);
+                    $$(webix_id).refresh();
+                }
+            );
+
+        },
+        SQLTable: function(webix_id, query)
+        {
+            __.PAYLOAD
+            (
+                {"action":"databot"}, 
+                query , 
+                function(response)
+                {   
+                    var result = JSON.parse(response); 
+                      
+                    $$(webix_id).clearAll();
+                    $$(webix_id).parse(result.data);
+                    
+                }
+            );
+
+        },
+
+        query: function(query, callback)
+        {
+            __.PAYLOAD
+            (
+                {"action":"databot"}, 
+                query , 
+                function(response)
+                { 
+                    var result = JSON.parse(response);  
+
+                    callback(result.data); 
+                }
+            );
         },      
 
         query_combo: function(view, query)
@@ -250,14 +297,7 @@
                 $$(view).parse(result.data);
             });
         },
-
-        userInfo: function()
-        {
-            var data = webix.storage.session.get(usr.session.key); 
-
-            return data != null ? data : false;
-        },
-
+ 
         setCookie: function(name,value,days) {
             var expires = "";
             if (days) {
@@ -270,8 +310,32 @@
 
         remCookie: function(name) {
             document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        }
+        },
 
+        firebase:
+        {
+            add: function(key, item)
+            {
+                __.current.FIREBASE.ref(key).push(item); 
+            },
+
+            on_write: function(key, callback)
+            {
+                __.current.FIREBASE.ref(key).on('child_added', function(data){
+
+                    __.current.FIREBASE.ref(key).remove();
+
+                    callback(data.val());   
+
+                });
+            } 
+        },
+
+        storage: 
+        {
+            set: function(key, value){ webix.storage.local.put(key, value); },
+            get: function(key       ){ return webix.storage.local.get(key); }
+        } 
     };
 
 })();
