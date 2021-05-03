@@ -44,10 +44,10 @@ Editar el archivo sdk/config/sources.json
 
 ```js
 [
-    { "tag" : "json"   , "url": "config/app.json"          }, 
-    { "tag" : "icon"   , "url": "ui/img/favicon.ico"       },
-    { "tag" : "link"   , "url": "sys/core/webix/webix.css" },
-    { "tag" : "link"   , "url": "ui/css/font_awesome/css/font-awesome.min.css"   },  
+    { "tag" : "json"   , "cache": true, "url": "config/app.json"          }, 
+    { "tag" : "icon"   , "cache": true, "url": "ui/img/favicon.ico"       },
+    { "tag" : "link"   , "cache": true, "url": "sys/core/webix/webix.css" },
+    { "tag" : "link"   , "cache": true, "url": "ui/css/font_awesome/css/font-awesome.min.css"   },  
     { "tag" : "link"   , "cache": true, "url": "ui/css/sidebar.css"       }, 
     { "tag" : "link"   , "cache": true, "url": "ui/css/waves.css"         },  
     { "tag" : "link"   , "cache": true, "url": "ui/css/admin.css"         }, 
