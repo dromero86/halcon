@@ -28,7 +28,7 @@
         require_force: true  , 
         autorefresh  : true  , 
         log_internal : false  ,
-        cssLoader    : "overflow: hidden; border:0; margin:0; padding:0;box-sizing: border-box; background-color: #1C2B2D; background-image: url('#url#sdk/ui/img/onseller-dark.png?id=1'); background-size:25%; background-attachment: fixed; height: 100%;width: 100%; height: 100vh;width: 100vw; background-position: center center; background-repeat: no-repeat; transition: all .5s ease; ",
+        cssLoader    : "overflow: hidden; border:0; margin:0; padding:0;box-sizing: border-box; background-color: #1C2B2D; background-image: url('#url#sdk/ui/img/logo.png?id=1'); background-size:25%; background-attachment: fixed; height: 100%;width: 100%; height: 100vh;width: 100vw; background-position: center center; background-repeat: no-repeat; transition: all .5s ease; ",
         iphoneDevice : function() 
         {
             var iDevices = [
