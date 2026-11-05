@@ -1,0 +1,438 @@
+/*
+ * Theme del dashboard migrado de Halcon.
+ *
+ * Se carga despues de zorzal.css. Los iconos son `svg` del set de Zorzal
+ * (`.hc-icon`), sin fuente de iconos: el color sale de `currentColor`. Todas
+ * las clases propias llevan el prefijo `hc-` y los valores salen de variables
+ * CSS, de modo que el theme se puede ajustar sin tocar las reglas.
+ *
+ * El dashboard monta las siguientes clases (ver compat/pages/dashboard.js):
+ *
+ *   .hc-dashboard          contenedor raiz del mount
+ *   .hc-mainbar            toolbar de la barra superior
+ *   .hc-logo               plantilla del logo dentro de la mainbar
+ *   .hc-sidebar            sidebar nativo (aside.z-sidebar)
+ *   .hc-content            area de contenido (layout vertical)
+ *   .hc-content__title     plantilla del titulo del contenido
+ *   .hc-content__body      plantilla del cuerpo del contenido
+ *   .hc-table              tabla del theme (tambien estiliza .z-datatable)
+ *
+ * No reemplaza admin.css ni sidebar.css: convive con ellos y solo se aplica
+ * dentro de `.hc-dashboard`.
+ */
+
+:root {
+  --hc-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --hc-bg: #f6f7f9;
+  --hc-surface: #ffffff;
+  --hc-surface-2: #eef1f5;
+  --hc-border: #d7dce3;
+  --hc-text: #1d2430;
+  --hc-muted: #66707d;
+
+  --hc-primary: #2f6fed;
+  --hc-primary-text: #ffffff;
+  --hc-danger: #c0392b;
+
+  --hc-mainbar-bg: #1d2430;
+  --hc-mainbar-text: #f6f7f9;
+  --hc-mainbar-hover: rgba(255, 255, 255, 0.12);
+  --hc-mainbar-height: 64px;
+
+  --hc-logo-size: 18px;
+  --hc-logo-spacing: 0.08em;
+
+  --hc-sidebar-bg: #eceff1;
+  --hc-sidebar-text: #454545;
+  --hc-sidebar-muted: #7b8794;
+  --hc-sidebar-active-bg: #27ae60;
+  --hc-sidebar-active-text: #ffffff;
+  --hc-sidebar-hover: rgba(0, 0, 0, 0.04);
+
+  --hc-content-pad: 18px 20px;
+  --hc-content-gap: 12px;
+  --hc-title-size: 22px;
+
+  --hc-radius: 8px;
+  --hc-radius-sm: 6px;
+  --hc-space: 12px;
+  --hc-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
+
+  --hc-table-head-bg: #f0f3f6;
+  --hc-table-head-text: #5b6676;
+  --hc-table-row-hover: #f6f7f9;
+  --hc-table-border: #d7dce3;
+
+  --hc-button-bg: #ffffff;
+  --hc-button-text: #1d2430;
+}
+
+/* --- contenedor ------------------------------------------------------ */
+
+.hc-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 460px;
+  background: var(--hc-surface);
+  border-radius: var(--hc-radius);
+  overflow: hidden;
+  color: var(--hc-text);
+  font-family: var(--hc-font);
+
+  /* El theme tambien fija las variables de Zorzal dentro del dashboard. */
+  --z-sidebar-bg: var(--hc-sidebar-bg);
+  --z-sidebar-active-bg: var(--hc-sidebar-active-bg);
+  --z-sidebar-active-text: var(--hc-sidebar-active-text);
+  --z-sidebar-item-hover: var(--hc-sidebar-hover);
+  --z-toolbar-bg: var(--hc-mainbar-bg);
+  --z-datatable-header-bg: var(--hc-table-head-bg);
+  --z-datatable-header-text: var(--hc-table-head-text);
+  --z-datatable-row-hover-bg: var(--hc-table-row-hover);
+  --z-datatable-border: var(--hc-table-border);
+}
+
+.hc-dashboard > .z-layout {
+  flex: 1 1 auto;
+  gap: 0;
+  min-height: 460px;
+}
+
+.hc-dashboard .z-layout--horizontal > .z-layout__cell:first-child {
+  flex: 0 0 auto;
+}
+
+.hc-dashboard .z-template__content {
+  white-space: pre-line;
+}
+
+/* --- iconos ---------------------------------------------------------- */
+
+/*
+ * Los iconos son `svg` de 24x24 dibujados por `compat/icons.js` y por el kind
+ * `hc-icon` del shim. No hay fuente de iconos: el tamano se controla desde el
+ * CSS y el trazo toma el color del texto (`currentColor`).
+ */
+.hc-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  color: inherit;
+  overflow: visible;
+}
+
+/* --- mainbar --------------------------------------------------------- */
+
+.hc-mainbar {
+  min-height: var(--hc-mainbar-height);
+  padding: 0 12px;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  background: var(--hc-mainbar-bg);
+  color: var(--hc-mainbar-text);
+}
+
+.hc-mainbar .z-toolbar__button {
+  min-height: 40px;
+  color: var(--hc-mainbar-text);
+  background: transparent;
+  border-color: transparent;
+}
+
+.hc-mainbar .z-toolbar__button:hover {
+  background: var(--hc-mainbar-hover);
+  border-color: transparent;
+}
+
+.hc-mainbar .z-toolbar__button:focus-visible {
+  outline: 2px solid var(--hc-primary);
+  outline-offset: 2px;
+}
+
+.hc-mainbar .z-toolbar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.hc-mainbar .z-toolbar__icon .hc-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.hc-mainbar .z-template:has(.z-template__content:empty) {
+  flex: 1 1 auto;
+}
+
+.hc-logo {
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+  padding: 0 10px;
+  color: var(--hc-mainbar-text);
+  font-size: var(--hc-logo-size);
+  font-weight: 700;
+  letter-spacing: var(--hc-logo-spacing);
+  white-space: nowrap;
+}
+
+.hc-logo .z-template__content {
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.hc-logo.main_logo--collapsed {
+  min-width: 64px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* --- sidebar --------------------------------------------------------- */
+
+.hc-sidebar {
+  height: 100%;
+  background: var(--hc-sidebar-bg);
+  border-right: 1px solid var(--hc-border);
+  color: var(--hc-sidebar-text);
+}
+
+.hc-sidebar .z-sidebar__header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--hc-border);
+}
+
+.hc-sidebar .z-sidebar__title {
+  color: var(--hc-sidebar-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hc-sidebar .z-sidebar__list {
+  padding: 6px 8px;
+}
+
+.hc-sidebar .z-sidebar__list--nested {
+  padding: 2px 0 6px 14px;
+}
+
+.hc-sidebar .z-sidebar__item {
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--hc-radius-sm);
+  color: var(--hc-sidebar-text);
+}
+
+.hc-sidebar .z-sidebar__item:hover {
+  background: var(--hc-sidebar-hover);
+}
+
+/* Las ramas con hijos se leen como secciones. */
+.hc-sidebar .z-sidebar__item--branch {
+  color: var(--hc-sidebar-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hc-sidebar .z-sidebar__item--branch .z-sidebar__icon {
+  color: var(--hc-sidebar-text);
+  font-size: 13px;
+}
+
+.hc-sidebar .z-sidebar__item--branch .z-sidebar__icon .hc-icon {
+  width: 13px;
+  height: 13px;
+}
+
+/* Los hijos heredan el estilo de item normal y se indentan. */
+.hc-sidebar .z-sidebar__list--nested .z-sidebar__item {
+  padding-left: 12px;
+  color: var(--hc-sidebar-text);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hc-sidebar .z-sidebar__icon {
+  width: 18px;
+  color: var(--hc-sidebar-muted);
+  font-size: 14px;
+}
+
+.hc-sidebar .z-sidebar__icon .hc-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.hc-sidebar .z-sidebar__item--active,
+.hc-sidebar .z-sidebar__item[aria-current="page"] {
+  background: var(--hc-sidebar-active-bg);
+  color: var(--hc-sidebar-active-text);
+}
+
+.hc-sidebar .z-sidebar__item--active .z-sidebar__icon,
+.hc-sidebar .z-sidebar__item[aria-current="page"] .z-sidebar__icon {
+  color: inherit;
+}
+
+.hc-sidebar.z-sidebar--collapsed .z-sidebar__item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* --- area de contenido ----------------------------------------------- */
+
+.hc-content {
+  padding: var(--hc-content-pad);
+  gap: var(--hc-content-gap);
+  align-content: flex-start;
+  background: var(--hc-surface);
+}
+
+.hc-content__title {
+  border-bottom: 1px solid var(--hc-border);
+}
+
+.hc-content__title .z-template__content {
+  color: var(--hc-text);
+  font-size: var(--hc-title-size);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.hc-content__body {
+  color: var(--hc-text);
+}
+
+.hc-content__body .z-template__content {
+  color: var(--hc-muted);
+  font-size: 14px;
+}
+
+/* --- botones --------------------------------------------------------- */
+
+.hc-dashboard .z-button {
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid var(--hc-border);
+  border-radius: var(--hc-radius-sm);
+  background: var(--hc-button-bg);
+  color: var(--hc-button-text);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.hc-dashboard .z-button:hover {
+  background: var(--hc-surface-2);
+}
+
+.hc-dashboard .z-button__icon {
+  margin-right: 6px;
+  color: inherit;
+}
+
+.hc-dashboard .z-button__icon .hc-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.hc-dashboard .z-button--primary {
+  background: var(--hc-primary);
+  border-color: var(--hc-primary);
+  color: var(--hc-primary-text);
+}
+
+.hc-dashboard .z-button--primary:hover {
+  background: var(--hc-primary);
+  filter: brightness(1.06);
+}
+
+.hc-dashboard .z-button--danger {
+  border-color: var(--hc-danger);
+  color: var(--hc-danger);
+}
+
+/* --- tabla ----------------------------------------------------------- */
+
+.hc-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--hc-surface);
+  font-family: var(--hc-font);
+  font-size: 13px;
+}
+
+.hc-table th,
+.hc-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--hc-table-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.hc-table th {
+  background: var(--hc-table-head-bg);
+  color: var(--hc-table-head-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hc-table tbody tr:hover {
+  background: var(--hc-table-row-hover);
+}
+
+.hc-table__icon {
+  width: 28px;
+  color: var(--hc-muted);
+  text-align: center;
+}
+
+.hc-table code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--hc-text);
+}
+
+/* El datatable de Zorzal hereda los mismos colores dentro del dashboard. */
+.hc-dashboard .z-datatable__table {
+  border: 1px solid var(--hc-table-border);
+}
+
+.hc-dashboard .z-datatable__cell {
+  border-bottom: 1px solid var(--hc-table-border);
+}
+
+.hc-dashboard .z-datatable__row:hover .z-datatable__cell {
+  background: var(--hc-table-row-hover);
+}
+
+/* --- utilidades ------------------------------------------------------ */
+
+.hc-hidden {
+  display: none;
+}
+
+.hc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

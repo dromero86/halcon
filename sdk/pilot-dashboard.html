@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Halcón · piloto del dashboard y del ABM sobre el shim</title>
+    <link rel="stylesheet" href="vendor/zorzal/src/zorzal.css" />
+    <link rel="stylesheet" href="compat/theme.css" />
+    <style>
+      :root {
+        --borde: #d7dce3;
+      }
+
+      body {
+        margin: 0;
+        background: #f6f7f9;
+        color: #1d2430;
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .barra {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        align-items: baseline;
+        padding: 12px 20px;
+        background: #1d2430;
+        color: #f6f7f9;
+      }
+
+      .barra__nota {
+        font-size: 12px;
+        color: #b7c0cc;
+      }
+
+      .pagina {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 18px 20px 48px;
+      }
+
+      .estado {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border: 1px solid var(--borde);
+        border-left: 4px solid #b7791f;
+        border-radius: 8px;
+        background: #fffdf7;
+      }
+
+      .estado[data-estado="ok"] {
+        border-left-color: #1f9d55;
+        background: #f4fbf7;
+      }
+
+      .estado[data-estado="error"] {
+        border-left-color: #c0392b;
+        background: #fdf5f4;
+      }
+
+      .estado__punto {
+        flex: 0 0 auto;
+        width: 10px;
+        height: 10px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: #b7791f;
+      }
+
+      .estado[data-estado="ok"] .estado__punto {
+        background: #1f9d55;
+      }
+
+      .estado[data-estado="error"] .estado__punto {
+        background: #c0392b;
+      }
+
+      .estado__texto {
+        font-weight: 600;
+      }
+
+      .estado__detalle {
+        margin: 4px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+        color: #3d4757;
+      }
+
+      .estado__detalle li {
+        margin-top: 2px;
+      }
+
+      .estado__detalle li[data-ok="no"] {
+        color: #c0392b;
+      }
+
+      .panel {
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden;
+        margin-bottom: 18px;
+      }
+
+      .panel__titulo {
+        margin: 0;
+        padding: 8px 12px;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5b6676;
+        border-bottom: 1px solid var(--borde);
+        background: #f0f3f6;
+      }
+
+      /* Ajustes propios del piloto. El theme del dashboard vive en
+         compat/theme.css; aca solo queda el estilo de las pantallas demo y de
+         la tabla de iconos. */
+      #app .pagina-demo {
+        margin: 8px 0 0;
+        padding: 10px 12px;
+        border: 1px dashed #b7791f;
+        border-radius: 6px;
+        background: #fffdf7;
+        font-size: 13px;
+      }
+
+      .tabla-iconos {
+        padding: 12px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="barra">
+      <strong>Halcón · piloto del dashboard y del ABM</strong>
+      <span class="barra__nota">dashboard y pantallas de Clientes migrados sobre el shim de Zorzal. Sidebar nativo, app.define/app.require y session shim, sin Webix.</span>
+    </header>
+
+    <main class="pagina">
+      <section class="estado" id="estado" data-estado="cargando">
+        <span class="estado__punto"></span>
+        <div>
+          <div class="estado__texto" id="estado-texto">Montando el dashboard...</div>
+          <ul class="estado__detalle" id="estado-detalle"></ul>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h1 class="panel__titulo">app.dashboard · app.abm.clientes_view · app.abm.clientes_form</h1>
+        <div id="app"></div>
+      </section>
+
+      <section class="panel">
+        <h1 class="panel__titulo">Iconos SVG del set de Zorzal</h1>
+        <div class="tabla-iconos">
+          <table class="hc-table" id="tabla-iconos">
+            <thead>
+              <tr>
+                <th>Icono</th>
+                <th>Nombre en Zorzal</th>
+                <th>Nombre en Halcón</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-iconos-cuerpo"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { webix } from './compat/webix-shim.js';
+      import { app, install } from './compat/app-shim.js';
+      import { usr, __, installSession } from './compat/session-shim.js';
+      import { resolveIconName, renderIcon } from './compat/icons.js';
+      import { mount } from './compat/pages/dashboard.js';
+      import './compat/pages/clientes_view.js';
+      import './compat/pages/clientes_form.js';
+      import * as clientesStore from './compat/store/clientes.js';
+
+      // Tabla visible del mapeo: icono dibujado como svg, nombre en el set de
+      // Zorzal y nombre de origen. Tambien sirve de muestra del estilo
+      // `hc-table` del theme.
+      const iconos = [
+        'dashboard',
+        'bars',
+        'ellipsis-v',
+        'cog',
+        'power-off',
+        'ticket',
+        'address-book',
+        'shopping-bag',
+        'truck',
+        'flag',
+        'shopping-cart',
+        'chevron-left',
+        'question',
+        'cloud-upload',
+        'save',
+        'plus',
+      ];
+      const cuerpoIconos = document.getElementById('tabla-iconos-cuerpo');
+      for (const nombre of iconos) {
+        const resuelto = resolveIconName(nombre);
+        const fila = document.createElement('tr');
+
+        const celdaIcono = document.createElement('td');
+        celdaIcono.className = 'hc-table__icon';
+        celdaIcono.appendChild(renderIcon(nombre, { doc: document }));
+
+        const celdaZorzal = document.createElement('td');
+        const codigo = document.createElement('code');
+        codigo.textContent = resuelto;
+        celdaZorzal.appendChild(codigo);
+
+        const celdaNombre = document.createElement('td');
+        celdaNombre.textContent = nombre;
+
+        fila.append(celdaIcono, celdaZorzal, celdaNombre);
+        cuerpoIconos.appendChild(fila);
+      }
+
+      // `app`, `usr` y `__` quedan tambien como globales, como en la
+      // aplicacion. El menu y la sesion salen del session shim: localStorage
+      // si hay datos y, si no, el usuario demo.
+      install(window);
+      installSession(window);
+
+      // Solo el Tablero necesita una definicion propia: el resto de los items
+      // del menu demo no tiene pantalla y el dashboard lo dice al elegirlos.
+      app.define('app.demo.tablero', () => 'Tablero de ejemplo resuelto por app.require');
+
+      const estado = document.getElementById('estado');
+      const estadoTexto = document.getElementById('estado-texto');
+      const estadoDetalle = document.getElementById('estado-detalle');
+
+      const pasos = [];
+
+      /**
+       * @param {boolean} ok
+       * @param {string} texto
+       */
+      function paso(ok, texto) {
+        pasos.push({ ok, texto });
+        const li = document.createElement('li');
+        li.dataset.ok = ok ? 'si' : 'no';
+        li.textContent = `${ok ? 'ok' : 'falla'} · ${texto}`;
+        estadoDetalle.appendChild(li);
+        return ok;
+      }
+
+      function cerrarEstado() {
+        const fallas = pasos.filter((item) => !item.ok);
+        estado.dataset.estado = fallas.length === 0 ? 'ok' : 'error';
+        estadoTexto.textContent =
+          fallas.length === 0
+            ? `Resultado: dashboard y ABM completos (${pasos.length} verificaciones)`
+            : `Resultado: ${fallas.length} de ${pasos.length} verificaciones fallaron`;
+      }
+
+      function fallar(mensaje) {
+        paso(false, mensaje);
+        cerrarEstado();
+      }
+
+      window.addEventListener('error', (event) => {
+        fallar(`error de pagina: ${event.message}`);
+      });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        fallar(`promesa rechazada: ${String(event.reason)}`);
+      });
+
+      /** @param {string} id */
+      function botonDe(id) {
+        const botones = document.querySelectorAll('#app .z-sidebar__item');
+        for (const boton of botones) {
+          if (boton.getAttribute('data-id') === id) return boton;
+        }
+        return null;
+      }
+
+      /** @returns {string} */
+      function tituloContenido() {
+        // Los ids del shim viven en `props`, no como atributo del DOM: se
+        // resuelven con `webix.$$`, que es la via publica del shim.
+        const vista = webix.$$('content_title');
+        const nodo = vista && vista.el ? vista.el.querySelector('.z-template__content') : null;
+        return nodo ? nodo.textContent.trim() : '';
+      }
+
+      /** @returns {string} */
+      function cuerpoContenido() {
+        const vista = webix.$$('content_body');
+        const nodo = vista && vista.el ? vista.el.querySelector('.z-template__content') : null;
+        return nodo ? nodo.textContent.trim() : '';
+      }
+
+      /** Filas de la tabla de clientes montada en el contenido. */
+      function filasTabla() {
+        return Array.from(document.querySelectorAll('#app .z-datatable__row'));
+      }
+
+      /**
+       * Texto de una celda.
+       * @param {Element} fila
+       * @param {number} indice
+       * @returns {string}
+       */
+      function celda(fila, indice) {
+        const nodo = fila && fila.children ? fila.children[indice] : null;
+        return nodo ? nodo.textContent.trim() : '';
+      }
+
+      let dashboard = null;
+      /** @type {{ cliente: Record<string, unknown>, filas: number }[]} */
+      const guardados = [];
+
+      document.addEventListener('clientes:guardado', (event) => {
+        guardados.push(event.detail);
+      });
+
+      try {
+        paso(typeof app.define === 'function' && typeof app.require === 'function', 'app.define y app.require disponibles');
+        paso(webix.isDefined('mainbar'), 'kind mainbar registrado por el dashboard');
+        paso(
+          app.isDefined('app.abm.clientes_view') && app.isDefined('app.abm.clientes_form'),
+          'pantallas app.abm.clientes_view y app.abm.clientes_form registradas'
+        );
+        paso(
+          Boolean(usr.session) && usr.session.enable === false,
+          `session shim activo con session.enable = ${usr.session ? usr.session.enable : 'sin sesion'}`
+        );
+        paso(
+          typeof __.isNumber === 'function' && __.isNumber('7') === true && __.isNumber('x') === false,
+          '__.isNumber responde como sdk/sys/core/helper.js'
+        );
+
+        dashboard = mount('#app');
+        paso(Boolean(dashboard && dashboard.root), 'dashboard.mount("#app") devolvio un controlador');
+
+        setTimeout(() => {
+          const sidebar = webix.$$('_sidebar');
+          paso(Boolean(sidebar), 'sidebar resuelto por $$("_sidebar")');
+          paso(sidebar && sidebar.kind === 'sidebar', `sidebar.kind = ${sidebar ? sidebar.kind : 'sin vista'}`);
+          paso(Boolean(document.querySelector('#app .z-sidebar')), 'el DOM tiene el widget nativo .z-sidebar (no el plugin de Webix)');
+
+          const botones = document.querySelectorAll('#app .z-sidebar__item');
+          paso(botones.length === 8, `items del menu renderizados = ${botones.length}`);
+          paso(Boolean(document.querySelector('#app .z-sidebar .z-sidebar__list--nested')), 'hay items anidados en el sidebar');
+
+          paso(tituloContenido() === 'Dashboard', `el area de contenido arranca en "${tituloContenido()}"`);
+
+          // Item sin hijos: marca el activo, pinta el contenido y resuelve la
+          // pantalla definida en el shim de app.
+          const tablero = botonDe('app.demo.tablero');
+          paso(Boolean(tablero), 'item sin hijos "Tablero" presente');
+          if (tablero) tablero.click();
+          paso(tituloContenido() === 'Tablero', `el contenido muestra el item seleccionado ("${tituloContenido()}")`);
+          paso(
+            Boolean(tablero && tablero.classList.contains('z-sidebar__item--active')),
+            'el sidebar marco el item activo'
+          );
+          paso(
+            cuerpoContenido().includes('Tablero de ejemplo'),
+            'app.require resolvio la definicion del item sin hijos'
+          );
+
+          // Item con hijos: abre el popup de submenu con sus hijos.
+          const operaciones = botonDe('app.seccion.operaciones');
+          paso(Boolean(operaciones), 'item con hijos "Operaciones" presente');
+          if (operaciones) operaciones.click();
+
+          const popup = webix.$$('my_pop');
+          paso(Boolean(popup && popup.open), 'el popup de submenu quedo abierto');
+          const itemsSubmenu = document.querySelectorAll('.z-popup .z-unitlist__item');
+          paso(itemsSubmenu.length === 2, `el popup lista los hijos del item = ${itemsSubmenu.length}`);
+          paso(
+            document.querySelectorAll('.z-popup .z-unitlist__item svg.hc-icon').length === itemsSubmenu.length,
+            'el template #icon# del submenu renderizo svg de icono'
+          );
+          paso(tituloContenido() === 'Operaciones', `el contenido muestra la seccion ("${tituloContenido()}")`);
+
+          // Un hijo del popup navega a la pantalla Clientes del ABM.
+          if (itemsSubmenu.length > 0) itemsSubmenu[0].click();
+          paso(tituloContenido() === 'Clientes', `el hijo del submenu navega ("${tituloContenido()}")`);
+          paso(Boolean(popup && !popup.open), 'el popup se cerro despues de elegir un hijo');
+          paso(
+            Boolean(botonDe('app.abm.clientes_view') && botonDe('app.abm.clientes_view').classList.contains('z-sidebar__item--active')),
+            'el sidebar movio el activo al hijo elegido'
+          );
+          paso(
+            Boolean(document.querySelector('#app .hc-page--clientes .z-datatable')),
+            'app.require monto la pantalla Clientes en el contenido'
+          );
+
+          const headers = Array.from(document.querySelectorAll('#app .z-datatable__header-text')).map((nodo) =>
+            nodo.textContent.trim()
+          );
+          paso(
+            headers.join('|') === 'Cliente|Dirección|DNI|Teléfono|Ingreso|Cobrador',
+            `columnas de la tabla = ${headers.join(' | ')}`
+          );
+          paso(filasTabla().length === 5, `la tabla de Clientes tiene 5 filas = ${filasTabla().length}`);
+
+          // Orden por columna: el datatable ordena al hacer clic en el
+          // encabezado. Se ordena por Cliente y se comprueba la primera fila.
+          const encabezado = document.querySelector('#app .z-datatable__header[data-column="cliente"]');
+          paso(Boolean(encabezado), 'la tabla tiene el encabezado de Cliente');
+          if (encabezado) encabezado.click();
+          const ordenado = document.querySelector('#app .z-datatable__header[data-column="cliente"]');
+          paso(
+            Boolean(ordenado) && ordenado.getAttribute('aria-sort') === 'ascending',
+            'el clic en el encabezado ordena la tabla por Cliente'
+          );
+          paso(celda(filasTabla()[0], 0) === 'Fernandez Carlos', `primera fila ordenada = "${celda(filasTabla()[0], 0)}"`);
+
+          // Doble clic: abre el formulario con la fila elegida.
+          const primera = filasTabla()[0];
+          paso(Boolean(primera), 'hay una fila para el doble clic');
+          if (primera) primera.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+          paso(Boolean(webix.$$('clientes_form')), 'el doble clic abre el formulario');
+          paso(
+            Boolean(document.querySelector('#app .hc-page--clientes-form .z-form')),
+            'el formulario quedo montado en el contenido'
+          );
+          const campoApellido = document.querySelector('#app input[name="apellido"]');
+          paso(
+            Boolean(campoApellido) && campoApellido.value === 'Fernandez',
+            `el formulario viene precargado (apellido = "${campoApellido ? campoApellido.value : ''}")`
+          );
+
+          // Edicion: guardar actualiza la fila y no agrega.
+          const formEdicion = webix.$$('clientes_form');
+          if (formEdicion) formEdicion.setValues({ tel: '11 5555-9999' });
+          const guardar = webix.$$('clientes_guardar');
+          paso(Boolean(guardar), 'el boton Guardar esta resuelto');
+          if (guardar) guardar.click();
+          paso(filasTabla().length === 5, `la edicion mantiene 5 filas = ${filasTabla().length}`);
+          paso(
+            document.querySelector('#app .z-datatable').textContent.includes('11 5555-9999'),
+            'la fila editada muestra el telefono nuevo'
+          );
+
+          // Alta: el boton Nuevo cliente abre el formulario vacio y la
+          // validacion obligatoria frena el guardado sin datos.
+          const nuevo = webix.$$('clientes_nuevo');
+          paso(Boolean(nuevo), 'la barra de Clientes tiene el boton Nuevo cliente');
+          if (nuevo) nuevo.click();
+          paso(Boolean(webix.$$('clientes_form')), 'Nuevo cliente abre el formulario de alta');
+          const guardarVacio = webix.$$('clientes_guardar');
+          if (guardarVacio) guardarVacio.click();
+          paso(
+            Boolean(document.querySelector('#app .z-form--invalid')) && Boolean(webix.$$('clientes_form')),
+            'guardar sin datos marca los obligatorios y no navega'
+          );
+
+          const formAlta = webix.$$('clientes_form');
+          if (formAlta) {
+            formAlta.setValues({
+              apellido: 'Lopez',
+              nombre: 'Ana',
+              addr: 'Rivadavia 1',
+              doc: '36000111',
+              tel: '11 5555-1006',
+              id_cobrador: '3',
+            });
+          }
+          const guardarAlta = webix.$$('clientes_guardar');
+          if (guardarAlta) guardarAlta.click();
+          paso(filasTabla().length === 6, `el alta deja 6 filas = ${filasTabla().length}`);
+          paso(
+            document.querySelector('#app .z-datatable').textContent.includes('Lopez Ana'),
+            'la fila nueva aparece en la tabla'
+          );
+          paso(
+            guardados.length > 0 && guardados[guardados.length - 1].filas === 6,
+            `se emitio clientes:guardado con 6 filas (${guardados.length} eventos)`
+          );
+          paso(clientesStore.list().length === 6, `el store comparte las 6 filas = ${clientesStore.list().length}`);
+
+          // El piloto no carga el SDK de Webix: no hay ningun script externo y
+          // el unico objeto `webix` es el shim (expone isDefined/protoUI).
+          paso(
+            document.querySelectorAll('script[src]').length === 0,
+            'la pagina no carga scripts externos'
+          );
+          paso(
+            typeof webix.isDefined === 'function' && typeof webix.protoUI === 'function',
+            'el unico objeto webix de la pagina es el shim, no el SDK'
+          );
+
+          // El boton del mainbar colapsa el sidebar nativo.
+          const accion = webix.$$('_main_btn_action');
+          paso(Boolean(accion), 'boton de la mainbar resuelto');
+          if (accion) {
+            accion.click();
+            paso(Boolean(document.querySelector('#app .z-sidebar--collapsed')), 'el toggle del mainbar colapso el sidebar');
+            accion.click();
+            paso(!document.querySelector('#app .z-sidebar--collapsed'), 'el toggle del mainbar restauro el sidebar');
+          }
+
+          // La pagina no carga ninguna hoja de iconos: los iconos son svg del
+          // theme propio.
+          const hojas = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(
+            (link) => link.getAttribute('href') || ''
+          );
+          paso(
+            hojas.every((href) => href.startsWith('vendor/zorzal/') || href.startsWith('compat/')),
+            'el piloto no carga hojas de iconos externas'
+          );
+          paso(hojas.some((href) => href.includes('compat/theme.css')), 'el piloto carga el theme propio compat/theme.css');
+          paso(Boolean(document.querySelector('#app .hc-dashboard')), 'el dashboard expone la clase hc-dashboard');
+
+          // Los botones con icono de la mainbar renderizan un svg y no dejan el
+          // nombre del icono como texto suelto.
+          const botonesConIcono = Array.from(
+            document.querySelectorAll('#app .hc-mainbar .z-toolbar__button')
+          ).filter((boton) => boton.querySelector('.z-toolbar__icon'));
+          const botonesResueltos = botonesConIcono.filter((boton) => {
+            const host = boton.querySelector('.z-toolbar__icon');
+            return Boolean(host.querySelector('svg.hc-icon')) && host.textContent.trim() === '';
+          });
+          paso(
+            botonesConIcono.length === 2 && botonesResueltos.length === botonesConIcono.length,
+            `botones del mainbar con svg y sin texto suelto = ${botonesResueltos.length}/${botonesConIcono.length}`
+          );
+
+          const iconosSidebar = document.querySelectorAll('#app .hc-sidebar .z-sidebar__icon svg.hc-icon');
+          paso(iconosSidebar.length === 8, `iconos del sidebar dibujados como svg = ${iconosSidebar.length}`);
+
+          // El kind `hc-icon` dibuja el icono de un boton fuera de una toolbar
+          // como svg 24x24 con los paths del set (no como texto ni como fuente).
+          const hostBoton = document.createElement('div');
+          hostBoton.hidden = true;
+          document.body.appendChild(hostBoton);
+          webix.ui({ view: 'button', label: 'Prueba', icon: 'cog' }, hostBoton);
+          const iconoBoton = hostBoton.querySelector('.z-button__icon svg.hc-icon');
+          const pathsBoton = iconoBoton ? iconoBoton.querySelectorAll('path').length : 0;
+          paso(
+            Boolean(iconoBoton) &&
+              iconoBoton.getAttribute('viewBox') === '0 0 24 24' &&
+              iconoBoton.classList.contains('hc-icon--cog') &&
+              pathsBoton === 2,
+            `el kind hc-icon dibuja el icono del boton como svg 24x24 con ${pathsBoton} paths`
+          );
+          hostBoton.remove();
+
+          // Verificacion visible del cambio: hay svg de icono y cero i.fa.
+          const iconosSvg = document.querySelectorAll('#app svg.hc-icon');
+          paso(iconosSvg.length >= 10, `iconos svg en el dashboard = ${iconosSvg.length}`);
+          paso(document.querySelectorAll('i.fa').length === 0, `elementos i.fa en la pagina = ${document.querySelectorAll('i.fa').length}`);
+          paso(
+            document.querySelectorAll('#tabla-iconos svg.hc-icon').length === iconos.length,
+            `iconos de la tabla de mapeo dibujados como svg = ${document.querySelectorAll('#tabla-iconos svg.hc-icon').length}`
+          );
+
+          cerrarEstado();
+        }, 250);
+      } catch (error) {
+        fallar(`excepcion al montar: ${error instanceof Error ? error.message : String(error)}`);
+      }
+
+      window.pilotoDashboard = {
+        get dashboard() {
+          return dashboard;
+        },
+        app,
+        webix,
+      };
+    </script>
+  </body>
+</html>

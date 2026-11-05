@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Halcón · piloto del shim de compatibilidad</title>
+    <link rel="stylesheet" href="vendor/zorzal/src/zorzal.css" />
+    <style>
+      :root {
+        --piloto-borde: #d7dce3;
+      }
+
+      body {
+        margin: 0;
+        background: var(--z-bg, #f6f7f9);
+        color: var(--z-text, #1d2430);
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .piloto__bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        align-items: baseline;
+        padding: 12px 20px;
+        background: #1d2430;
+        color: #f6f7f9;
+      }
+
+      .piloto__nota {
+        font-size: 12px;
+        color: #b7c0cc;
+      }
+
+      .piloto__page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 18px 20px 48px;
+      }
+
+      .estado {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border: 1px solid var(--piloto-borde);
+        border-left: 4px solid #b7791f;
+        border-radius: 8px;
+        background: #fffdf7;
+      }
+
+      .estado[data-estado="ok"] {
+        border-left-color: #1f9d55;
+        background: #f4fbf7;
+      }
+
+      .estado[data-estado="error"] {
+        border-left-color: #c0392b;
+        background: #fdf5f4;
+      }
+
+      .estado__punto {
+        flex: 0 0 auto;
+        width: 10px;
+        height: 10px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: #b7791f;
+      }
+
+      .estado[data-estado="ok"] .estado__punto {
+        background: #1f9d55;
+      }
+
+      .estado[data-estado="error"] .estado__punto {
+        background: #c0392b;
+      }
+
+      .estado__texto {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .estado__mensaje {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .estado__detalle {
+        margin: 6px 0 0;
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: #4c5663;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .estado__detalle:empty {
+        display: none;
+      }
+
+      .piloto__app {
+        padding: 14px;
+        border: 1px solid var(--piloto-borde);
+        border-radius: 10px;
+        background: #ffffff;
+      }
+
+      .piloto__app:empty::after {
+        content: "Sin montar todavía.";
+        font-size: 12px;
+        color: #66707d;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="piloto__bar">
+      <strong>Halcón · piloto del shim de compatibilidad</strong>
+      <span class="piloto__nota">Zorzal vendorizado en sdk/vendor · sin SDK de Webix</span>
+    </header>
+
+    <main class="piloto__page">
+      <section id="estado" class="estado" data-estado="cargando" role="status" aria-live="polite">
+        <span class="estado__punto" aria-hidden="true"></span>
+        <div class="estado__texto">
+          <p id="estado-mensaje" class="estado__mensaje">Cargando el shim de compatibilidad...</p>
+          <pre id="estado-detalle" class="estado__detalle"></pre>
+        </div>
+      </section>
+
+      <div id="app" class="piloto__app"></div>
+    </main>
+
+    <script>
+      // Estado en pantalla: el piloto tiene que poder diagnosticarse sin consola.
+      (function () {
+        var panel = document.getElementById('estado');
+        var mensaje = document.getElementById('estado-mensaje');
+        var detalle = document.getElementById('estado-detalle');
+        var piloto = (window.__piloto = { estado: 'cargando', mensaje: '', lineas: [] });
+        var vigilancia = null;
+
+        window.pilotoEstado = function (nivel, texto, lineas) {
+          piloto.estado = nivel;
+          piloto.mensaje = String(texto);
+          piloto.lineas = (lineas || []).filter(Boolean).map(String);
+          panel.setAttribute('data-estado', nivel);
+          mensaje.textContent = piloto.mensaje;
+          detalle.textContent = piloto.lineas.join('\n');
+          if (vigilancia && nivel !== 'cargando') {
+            clearTimeout(vigilancia);
+            vigilancia = null;
+          }
+        };
+
+        function describir(error) {
+          if (!error) return 'error desconocido';
+          if (error.stack) return String(error.stack);
+          return String(error.message || error);
+        }
+
+        function fallar(origen, error) {
+          if (piloto.estado === 'error') return;
+          window.pilotoEstado('error', origen, [describir(error)]);
+        }
+
+        window.addEventListener('error', function (event) {
+          var donde = event && event.filename ? event.filename + ':' + event.lineno : '';
+          fallar('Error de carga en el piloto', event && (event.error || event.message) || donde);
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+          fallar('Promesa rechazada sin manejar', event && event.reason);
+        });
+
+        vigilancia = setTimeout(function () {
+          if (piloto.estado === 'cargando') {
+            fallar('El piloto no terminó de montar en 10 s', new Error('tiempo agotado'));
+          }
+        }, 10000);
+      })();
+    </script>
+
+    <script type="module">
+      const pasos = [];
+      const anotar = (texto) => {
+        pasos.push(texto);
+        return texto;
+      };
+      const estado = (nivel, mensaje, extra) => window.pilotoEstado(nivel, mensaje, [...pasos, ...(extra || [])]);
+      const describir = (error) => (error && error.stack ? String(error.stack) : String(error));
+
+      let webix = null;
+      try {
+        const modulo = await import('./compat/webix-shim.js');
+        webix = modulo.webix || modulo.default;
+        anotar('shim importado como módulo ES desde sdk/compat/webix-shim.js');
+        anotar('window.webix: ' + typeof window.webix + ' · window.$$: ' + typeof window.$$);
+      } catch (error) {
+        estado('error', 'No se pudo cargar el shim de compatibilidad', [describir(error)]);
+      }
+
+      if (webix) {
+        try {
+          if (typeof webix.ui !== 'function') throw new Error('el shim no expone webix.ui');
+
+          const inicial = [
+            { id: 'ana', nombre: 'Ana García', puesto: 'Sueldos', horas: 12 },
+            { id: 'beto', nombre: 'Beto Ruiz', puesto: 'Compras', horas: 7 },
+            { id: 'caro', nombre: 'Caro Paz', puesto: 'Depósito', horas: 9 },
+          ];
+          let personas = inicial.map((persona) => ({ ...persona }));
+          let seleccion = 'ana';
+
+          const porId = (id) => personas.find((persona) => persona.id === id) || null;
+          const total = () => personas.reduce((suma, persona) => suma + persona.horas, 0);
+
+          const escribir = (id, texto) => {
+            const vista = webix.$$(id);
+            if (vista && typeof vista.setValue === 'function') vista.setValue(texto);
+          };
+
+          const pintarResumen = () => {
+            const persona = porId(seleccion);
+            const campo = webix.$$('campoNombre');
+            const nombre = campo && typeof campo.getValue === 'function' ? campo.getValue() : '';
+            escribir('saludo', (nombre ? 'Hola, ' + nombre : 'Sin nombre') + ' · ' + total() + ' h');
+            escribir(
+              'detalle',
+              persona
+                ? {
+                    nombre: persona.nombre,
+                    puesto: persona.puesto,
+                    horas: persona.horas,
+                    texto: 'Seleccionado: ' + persona.nombre,
+                  }
+                : null
+            );
+          };
+
+          const sumar = () => {
+            const persona = porId(seleccion);
+            if (!persona) return;
+            persona.horas += 1;
+            const lista = webix.$$('listaPersonas');
+            if (lista && typeof lista.setData === 'function') lista.setData(personas);
+            pintarResumen();
+          };
+
+          const reiniciar = () => {
+            personas = inicial.map((persona) => ({ ...persona }));
+            seleccion = 'ana';
+            const lista = webix.$$('listaPersonas');
+            if (lista && typeof lista.setData === 'function') lista.setData(personas);
+            if (lista && typeof lista.set === 'function') lista.set({ selected: seleccion });
+            pintarResumen();
+          };
+
+          webix.ui(
+            {
+              view: 'layout',
+              rows: [
+                {
+                  view: 'toolbar',
+                  elements: [
+                    { view: 'button', id: 'btnSumar', value: 'Sumar hora', click: sumar },
+                    { view: 'button', id: 'btnReiniciar', value: 'Reiniciar', click: reiniciar },
+                    { view: 'label', label: 'Halcón sobre Zorzal' },
+                  ],
+                },
+                {
+                  view: 'layout',
+                  cols: [
+                    {
+                      view: 'text',
+                      id: 'campoNombre',
+                      label: 'Nombre',
+                      value: 'Ana García',
+                      placeholder: 'Nombre a saludar',
+                      on: {
+                        change: () => pintarResumen(),
+                      },
+                    },
+                    { view: 'label', id: 'saludo', label: 'Hola, Ana García' },
+                  ],
+                },
+                {
+                  view: 'list',
+                  id: 'listaPersonas',
+                  select: seleccion,
+                  template: '#nombre# · #puesto# · #horas# h',
+                  data: personas,
+                  on: {
+                    select: (data) => {
+                      seleccion = String((data && data.id) || '');
+                      pintarResumen();
+                    },
+                  },
+                },
+                {
+                  view: 'template',
+                  id: 'detalle',
+                  template: 'Seleccionado: {{ nombre }} · {{ puesto }} · {{ horas }} h',
+                  data: personas[0],
+                },
+              ],
+            },
+            document.getElementById('app')
+          );
+
+          const controles = ['listaPersonas', 'campoNombre', 'saludo', 'detalle', 'btnSumar', 'btnReiniciar'];
+          pintarResumen();
+          const resueltos = controles.filter((id) => webix.$$(id));
+          const faltantes = controles.filter((id) => !webix.$$(id));
+
+          anotar('layout vertical montado con webix.ui');
+          anotar('$$ resolvió ' + resueltos.length + '/' + controles.length + ' ids');
+          anotar('valor de campoNombre: ' + JSON.stringify(webix.$$('campoNombre').getValue()));
+
+          if (faltantes.length) {
+            estado('error', 'El layout montó pero faltan vistas por id', ['sin resolver: ' + faltantes.join(', ')]);
+          } else {
+            estado('ok', 'Piloto montado: toolbar, fila de campos, lista con template y detalle');
+          }
+        } catch (error) {
+          estado('error', 'Fallo al montar el layout', [describir(error)]);
+        }
+      }
+    </script>
+  </body>
+</html>
