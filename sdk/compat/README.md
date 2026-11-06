@@ -71,6 +71,32 @@ iconos externa y que no queden elementos `i.fa`.
 No hay modo `?probar=1`: el piloto ejercita los flujos solo, en orden, al
 montar. La única acción manual es hacer clic en los ítems del sidebar.
 
+## Responsive
+
+Zorzal no trae un sistema de breakpoints ni media queries en su CSS: los
+layouts son flex (`min-width: 0`), el sidebar expone `collapse`, `expand` y
+`toggle`, y `env` informa `isMobile`/`isTouch`. La adaptación vive en la capa
+de Halcón:
+
+- `compat/pages/dashboard.js`: media query de 900 px, drawer con backdrop, y
+  restauración del estado de colapso al volver a escritorio.
+- `compat/theme.css`: estilos del drawer y ajustes de tabla, formularios y
+  mainbar.
+
+Comportamiento:
+
+- **≤ 900 px**: el sidebar sale del flujo y se abre como drawer desde el botón
+  de la mainbar; se cierra al elegir una hoja, con `Escape` o tocando el
+  backdrop. Las ramas se expanden inline, sin popup. La tabla de Clientes hace
+  scroll horizontal dentro de su panel.
+- **≤ 640 px**: mainbar compacta (logo reducido, sin caja de búsqueda),
+  paddings y tipografía más chicos, y botones de al menos 44 px.
+- **> 900 px**: se conserva el colapso normal del sidebar y el popup de
+  submenú.
+
+El piloto detecta el viewport y verifica el comportamiento que corresponde
+(drawer en mobile, colapso y popup en escritorio).
+
 ## Superficie cubierta
 
 `webix.ui(spec, container?)` traduce el spec declarativo a Zorzal y lo monta.

@@ -98,8 +98,14 @@ export function mount(host, options = {}) {
     vaciar(target);
     return page.mount(target, {
       id,
-      onSaved: () => mount(target),
-      onBack: () => mount(target),
+      onSaved: () => {
+        vaciar(target);
+        return mount(target);
+      },
+      onBack: () => {
+        vaciar(target);
+        return mount(target);
+      },
     });
   }
 

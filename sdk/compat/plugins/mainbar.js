@@ -22,6 +22,22 @@ const LOGO_ID = '_mb_logo';
 const SIDEBAR_ID = '_sidebar';
 
 /**
+ * Handler que puede reemplazar el toggle lateral. Lo usa el dashboard para
+ * abrir el drawer en pantallas angostas; si devuelve `false` se aplica el
+ * comportamiento normal (colapsar el sidebar).
+ * @type {null | (() => boolean)}
+ */
+let sidebarToggleOverride = null;
+
+/**
+ * Registra un reemplazo para el toggle lateral. Pasar `null` lo quita.
+ * @param {null | (() => boolean)} handler
+ */
+export function setSidebarToggle(handler) {
+  sidebarToggleOverride = typeof handler === 'function' ? handler : null;
+}
+
+/**
  * Cambia el contenido del logo. El original volvia a montar un `template`
  * dentro del mismo id con otro ancho; aca se actualiza la vista y se marca la
  * clase que el CSS usa para el estado colapsado.
@@ -43,6 +59,7 @@ function paintLogo(collapsed) {
  * piloto no existe, asi que se avisa una vez por clic.
  */
 function toggleSidebar() {
+  if (sidebarToggleOverride && sidebarToggleOverride() === true) return;
   const sidebar = webix.$$(SIDEBAR_ID);
   if (sidebar && typeof sidebar.toggle === 'function') {
     sidebar.toggle();

@@ -35,10 +35,13 @@
 import { webix, normalizeSpec } from '../webix-shim.js';
 import { app } from '../app-shim.js';
 import { usr } from '../globals.js';
-import '../plugins/mainbar.js';
+import { setSidebarToggle } from '../plugins/mainbar.js';
 
 /** Id del sidebar: el `mainbar` portado lo usa para el toggle lateral. */
 const SIDEBAR_ID = '_sidebar';
+
+/** Breakpoint del drawer: por debajo, el sidebar deja de ocupar una columna. */
+const MOBILE_QUERY = '(max-width: 900px)';
 
 /** Id del popup de submenu, igual que en el original. */
 const POPUP_ID = 'my_pop';
@@ -167,6 +170,7 @@ function describe(value) {
  *   popup: any,
  *   menu: any[],
  *   select: (id: unknown) => boolean,
+ *   drawer: { isOpen: () => boolean, open: () => boolean, close: () => boolean, toggle: () => boolean },
  *   destroy: () => void,
  * }}
  */
@@ -256,6 +260,104 @@ export function mount(root, options = {}) {
   mark(shell.querySelector('.z-toolbar'), 'hc-mainbar');
   mark(shell.querySelector('.z-toolbar > .z-template'), 'hc-logo');
   mark(shell.querySelector('.z-sidebar'), 'hc-sidebar');
+
+  // --- responsive: sidebar como drawer en pantallas angostas ----------
+  // Zorzal no trae breakpoints: el layout es flex y el sidebar expone
+  // collapse/expand/toggle. El drawer se arma aca, con una media query, y
+  // reutiliza el boton de la mainbar como disparador.
+  const sidebar = view(SIDEBAR_ID);
+  const sidebarEl = shell.querySelector('.hc-sidebar');
+  const sidebarCell = sidebarEl && sidebarEl.closest ? sidebarEl.closest('.z-layout__cell') : null;
+  if (sidebarCell) sidebarCell.classList.add('hc-sidebar-cell');
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'hc-drawer-backdrop';
+  backdrop.setAttribute('aria-hidden', 'true');
+  shell.appendChild(backdrop);
+
+  const action = view('_main_btn_action');
+  const actionEl = action && action.el ? action.el : shell.querySelector('[data-id="_main_btn_action"]');
+
+  const media =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia(MOBILE_QUERY)
+      : null;
+  const isMobile = () => Boolean(media && media.matches);
+  let mobileMode = false;
+  let drawerOpen = false;
+  let desktopCollapsed = Boolean(sidebar && sidebar.collapsed);
+
+  /**
+   * Abre o cierra el drawer. En escritorio no hace nada: ahi manda el
+   * colapso normal del sidebar.
+   * @param {boolean} open
+   * @returns {boolean} `true` si cambio el estado
+   */
+  function setDrawer(open) {
+    const next = Boolean(open) && isMobile();
+    if (next === drawerOpen) {
+      if (!next && sidebarCell && isMobile()) sidebarCell.inert = true;
+      return false;
+    }
+    drawerOpen = next;
+    shell.classList.toggle('hc-dashboard--drawer-open', next);
+    if (sidebarCell) sidebarCell.inert = isMobile() ? !next : false;
+    if (actionEl) actionEl.setAttribute('aria-expanded', String(next));
+    if (next) {
+      if (sidebar && typeof sidebar.expand === 'function') sidebar.expand('drawer');
+    } else {
+      closePopup();
+    }
+    return true;
+  }
+
+  /**
+   * Aplica el modo segun el ancho. Al entrar en mobile guarda el colapso de
+   * escritorio y expande el sidebar para que el drawer se vea completo; al
+   * volver a escritorio restaura ese estado.
+   */
+  function applyMode() {
+    const mobile = isMobile();
+    if (mobile === mobileMode) return;
+    mobileMode = mobile;
+    if (mobile) {
+      desktopCollapsed = Boolean(sidebar && sidebar.collapsed);
+      shell.classList.add('hc-dashboard--mobile');
+      setDrawer(false);
+      closePopup();
+      if (sidebarCell) sidebarCell.inert = true;
+      if (sidebar && typeof sidebar.expand === 'function') sidebar.expand('responsive');
+    } else {
+      shell.classList.remove('hc-dashboard--mobile');
+      setDrawer(false);
+      if (sidebarCell) sidebarCell.inert = false;
+      if (sidebar) {
+        if (desktopCollapsed && typeof sidebar.collapse === 'function') sidebar.collapse('responsive');
+        else if (!desktopCollapsed && typeof sidebar.expand === 'function') sidebar.expand('responsive');
+      }
+    }
+  }
+
+  const onSidebarToggle = () => {
+    if (!isMobile()) return false;
+    setDrawer(!drawerOpen);
+    return true;
+  };
+  setSidebarToggle(onSidebarToggle);
+
+  backdrop.addEventListener('click', () => setDrawer(false));
+
+  const onKeyDown = (event) => {
+    if (event && event.key === 'Escape' && drawerOpen) setDrawer(false);
+  };
+  document.addEventListener('keydown', onKeyDown);
+
+  const onMediaChange = () => applyMode();
+  if (media) {
+    if (typeof media.addEventListener === 'function') media.addEventListener('change', onMediaChange);
+    else if (typeof media.addListener === 'function') media.addListener(onMediaChange);
+  }
+  applyMode();
 
   /**
    * @param {string} id
@@ -382,8 +484,16 @@ export function mount(root, options = {}) {
     const node = index.get(asText(id));
     if (!node) return false;
     paintContent(node);
-    if (node.children.length > 0) openSubmenu(node);
-    else closePopup();
+    if (node.children.length > 0) {
+      // En mobile la rama ya se expande inline; el popup duplicaria el
+      // submenu y taparia el contenido. El drawer queda abierto para elegir
+      // un hijo.
+      if (isMobile()) closePopup();
+      else openSubmenu(node);
+    } else {
+      closePopup();
+      if (isMobile()) setDrawer(false);
+    }
     if (onChange) onChange(node);
     return true;
   }
@@ -407,6 +517,13 @@ export function mount(root, options = {}) {
    */
   function destroy() {
     closePopup();
+    setSidebarToggle(null);
+    if (media) {
+      if (typeof media.removeEventListener === 'function') media.removeEventListener('change', onMediaChange);
+      else if (typeof media.removeListener === 'function') media.removeListener(onMediaChange);
+    }
+    document.removeEventListener('keydown', onKeyDown);
+    if (sidebarCell) sidebarCell.inert = false;
     if (popup && typeof popup.destroy === 'function') popup.destroy();
     if (layout && typeof layout.destroy === 'function') layout.destroy();
     if (shell.parentNode) shell.parentNode.removeChild(shell);
@@ -418,6 +535,12 @@ export function mount(root, options = {}) {
     popup,
     menu,
     select: selectInSidebar,
+    drawer: {
+      isOpen: () => drawerOpen,
+      open: () => setDrawer(true),
+      close: () => setDrawer(false),
+      toggle: () => setDrawer(!drawerOpen),
+    },
     destroy,
   };
 }

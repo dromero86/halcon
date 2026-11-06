@@ -85,7 +85,6 @@
   --z-sidebar-active-bg: var(--hc-sidebar-active-bg);
   --z-sidebar-active-text: var(--hc-sidebar-active-text);
   --z-sidebar-item-hover: var(--hc-sidebar-hover);
-  --z-toolbar-bg: var(--hc-mainbar-bg);
   --z-datatable-header-bg: var(--hc-table-head-bg);
   --z-datatable-header-text: var(--hc-table-head-text);
   --z-datatable-row-hover-bg: var(--hc-table-row-hover);
@@ -436,3 +435,150 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* --- responsive ------------------------------------------------------ */
+
+/*
+ * Zorzal no trae breakpoints: sus layouts son flex y el sidebar expone
+ * `collapse`/`expand`/`toggle`. El modo mobile se resuelve aca (CSS) y en
+ * `pages/dashboard.js` (drawer + media query).
+ */
+
+.hc-drawer-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .hc-dashboard {
+    position: relative;
+  }
+
+  /* El sidebar sale del flujo y se muestra como drawer sobre el contenido. */
+  .hc-sidebar-cell {
+    position: absolute;
+    top: var(--hc-mainbar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(280px, 84vw) !important;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s ease;
+  }
+
+  .hc-dashboard--drawer-open .hc-sidebar-cell {
+    transform: translateX(0);
+    visibility: visible;
+    box-shadow: var(--hc-shadow);
+  }
+
+  .hc-sidebar-cell > .hc-sidebar {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .hc-drawer-backdrop {
+    display: block;
+    position: absolute;
+    top: var(--hc-mainbar-height);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 35;
+    background: rgba(17, 24, 39, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .hc-dashboard--drawer-open .hc-drawer-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hc-content,
+  .hc-content__body,
+  .hc-page {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* La tabla conserva su ancho util y hace scroll dentro del panel. */
+  .hc-page--clientes .z-datatable {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .hc-page--clientes .z-datatable__table {
+    min-width: 680px;
+  }
+
+  .hc-page--clientes .z-toolbar,
+  .hc-page--clientes-form .z-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .hc-page--clientes-form .z-toolbar .z-label {
+    flex: 1 1 140px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hc-dashboard .z-button,
+  .hc-dashboard .z-toolbar__button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hc-dashboard {
+    --hc-mainbar-height: 56px;
+    --hc-content-pad: 14px 12px;
+    --hc-title-size: 18px;
+    border-radius: 0;
+  }
+
+  .hc-mainbar {
+    padding: 0 6px;
+    gap: 2px;
+  }
+
+  .hc-logo {
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .hc-logo.main_logo--collapsed {
+    min-width: 0;
+  }
+
+  /* La caja de busqueda y el relleno de la mainbar no entran en un telefono. */
+  .hc-mainbar > .z-template:not(.hc-logo) {
+    display: none;
+  }
+
+  .hc-mainbar .z-toolbar__button {
+    min-width: 44px;
+    padding: 6px 8px;
+  }
+
+  .hc-sidebar-cell {
+    width: min(300px, 86vw) !important;
+  }
+
+  .hc-content__title .z-template__content {
+    font-size: var(--hc-title-size);
+  }
+
+  .hc-page--clientes .z-datatable__table {
+    min-width: 620px;
+  }
+}
+

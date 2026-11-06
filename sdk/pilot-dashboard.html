@@ -133,6 +133,23 @@
         padding: 12px;
         overflow-x: auto;
       }
+
+      @media (max-width: 640px) {
+        .barra {
+          padding: 10px 12px;
+        }
+
+        .pagina {
+          padding: 12px 10px 32px;
+        }
+
+        /* El piloto corre 60 verificaciones: en un telefono la lista no debe
+           empujar el dashboard fuera de la primera pantalla. */
+        .estado__detalle {
+          max-height: 140px;
+          overflow-y: auto;
+        }
+      }
     </style>
   </head>
   <body>
@@ -370,25 +387,41 @@
             'app.require resolvio la definicion del item sin hijos'
           );
 
-          // Item con hijos: abre el popup de submenu con sus hijos.
+          // Item con hijos: en escritorio abre el popup de submenu; en mobile
+          // la rama se expande inline dentro del drawer.
           const operaciones = botonDe('app.seccion.operaciones');
           paso(Boolean(operaciones), 'item con hijos "Operaciones" presente');
           if (operaciones) operaciones.click();
 
+          const enMovil = window.matchMedia('(max-width: 900px)').matches;
           const popup = webix.$$('my_pop');
-          paso(Boolean(popup && popup.open), 'el popup de submenu quedo abierto');
           const itemsSubmenu = document.querySelectorAll('.z-popup .z-unitlist__item');
-          paso(itemsSubmenu.length === 2, `el popup lista los hijos del item = ${itemsSubmenu.length}`);
-          paso(
-            document.querySelectorAll('.z-popup .z-unitlist__item svg.hc-icon').length === itemsSubmenu.length,
-            'el template #icon# del submenu renderizo svg de icono'
-          );
+          if (enMovil) {
+            paso(Boolean(popup && !popup.open), 'en mobile la rama se expande inline y no abre popup');
+            paso(
+              Boolean(operaciones && operaciones.getAttribute('aria-expanded') === 'true'),
+              'la rama Operaciones quedo expandida en el sidebar'
+            );
+          } else {
+            paso(Boolean(popup && popup.open), 'el popup de submenu quedo abierto');
+            paso(itemsSubmenu.length === 2, `el popup lista los hijos del item = ${itemsSubmenu.length}`);
+            paso(
+              document.querySelectorAll('.z-popup .z-unitlist__item svg.hc-icon').length === itemsSubmenu.length,
+              'el template #icon# del submenu renderizo svg de icono'
+            );
+          }
           paso(tituloContenido() === 'Operaciones', `el contenido muestra la seccion ("${tituloContenido()}")`);
 
-          // Un hijo del popup navega a la pantalla Clientes del ABM.
+          // Un hijo navega a la pantalla Clientes del ABM: desde el popup en
+          // escritorio, desde el submenu inline en mobile.
           if (itemsSubmenu.length > 0) itemsSubmenu[0].click();
+          else {
+            const hijoClientes = botonDe('app.abm.clientes_view');
+            paso(Boolean(hijoClientes), 'el hijo Clientes esta en el submenu inline');
+            if (hijoClientes) hijoClientes.click();
+          }
           paso(tituloContenido() === 'Clientes', `el hijo del submenu navega ("${tituloContenido()}")`);
-          paso(Boolean(popup && !popup.open), 'el popup se cerro despues de elegir un hijo');
+          paso(Boolean(popup && !popup.open), 'no queda popup abierto despues de elegir un hijo');
           paso(
             Boolean(botonDe('app.abm.clientes_view') && botonDe('app.abm.clientes_view').classList.contains('z-sidebar__item--active')),
             'el sidebar movio el activo al hijo elegido'
@@ -494,15 +527,38 @@
             'el unico objeto webix de la pagina es el shim, no el SDK'
           );
 
-          // El boton del mainbar colapsa el sidebar nativo.
+          // El boton del mainbar colapsa el sidebar en escritorio y abre el
+          // drawer en mobile.
           const accion = webix.$$('_main_btn_action');
           paso(Boolean(accion), 'boton de la mainbar resuelto');
           if (accion) {
-            accion.click();
-            paso(Boolean(document.querySelector('#app .z-sidebar--collapsed')), 'el toggle del mainbar colapso el sidebar');
-            accion.click();
-            paso(!document.querySelector('#app .z-sidebar--collapsed'), 'el toggle del mainbar restauro el sidebar');
+            if (enMovil) {
+              accion.click();
+              paso(
+                Boolean(document.querySelector('#app .hc-dashboard').classList.contains('hc-dashboard--drawer-open')),
+                'el toggle del mainbar abre el drawer en mobile'
+              );
+              const celdaDrawer = document.querySelector('#app .hc-sidebar-cell');
+              paso(Boolean(celdaDrawer) && celdaDrawer.inert === false, 'el drawer abierto deja el sidebar interactivo');
+              accion.click();
+              paso(
+                !document.querySelector('#app .hc-dashboard').classList.contains('hc-dashboard--drawer-open'),
+                'el toggle del mainbar cierra el drawer'
+              );
+            } else {
+              accion.click();
+              paso(Boolean(document.querySelector('#app .z-sidebar--collapsed')), 'el toggle del mainbar colapso el sidebar');
+              accion.click();
+              paso(!document.querySelector('#app .z-sidebar--collapsed'), 'el toggle del mainbar restauro el sidebar');
+            }
           }
+
+          // La pagina no desborda horizontalmente: las tablas hacen scroll
+          // dentro de su panel.
+          paso(
+            document.documentElement.scrollWidth <= window.innerWidth + 1,
+            `sin scroll horizontal de pagina (${document.documentElement.scrollWidth}/${window.innerWidth})`
+          );
 
           // La pagina no carga ninguna hoja de iconos: los iconos son svg del
           // theme propio.
