@@ -4,7 +4,7 @@
  * dependencias.
  *
  * La matriz de navegadores vive en `browserslist` (`package.json`) y se
- * documenta en `docs/2026-11-07-navegadores.md`. Este script es el control
+ * documenta en el SSOT (`projects/halcon/docs/2026-11-07-manual.md`). Este script es el control
  * automatico de esa matriz: recorre `sdk/src` y `sdk/compat` (`.js` y `.mjs`)
  * y falla si encuentra APIs fuera de la matriz o que necesitarian polyfill:
  *
@@ -18,7 +18,7 @@
  *
  * Excepciones: `EXCEPCIONES` es una lista vacia por defecto. Cada entrada
  * declara `archivo`, `regla`, `motivo` y, opcionalmente, `linea`; se justifica
- * en `docs/2026-11-07-navegadores.md`. Una excepcion sin motivo, o que no
+ * en el SSOT (`projects/halcon/docs/2026-11-07-manual.md`). Una excepcion sin motivo, o que no
  * coincide con ningun hallazgo, tambien hace fallar el script: una excepcion
  * silenciosa es una regresion futura.
  *
@@ -330,7 +330,7 @@ if (esEntrada) {
   }
   for (const hallazgo of informe.perdonados) {
     salida.push(
-      `${hallazgo.archivo}:${hallazgo.linea}: ${hallazgo.regla}: exceptuado (ver docs/2026-11-07-navegadores.md)`
+      `${hallazgo.archivo}:${hallazgo.linea}: ${hallazgo.regla}: exceptuado (ver SSOT projects/halcon/docs/2026-11-07-manual.md)`
     );
   }
   for (const invalida of informe.excepcionesInvalidas) {

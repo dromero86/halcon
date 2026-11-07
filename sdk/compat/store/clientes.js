@@ -24,7 +24,7 @@
  * store.
  *
  * Lo que falta para el backend real (query SQL, store persistente y sesion)
- * esta documentado en `sdk/compat/README.md`.
+ * esta documentado en el SSOT (`projects/halcon/docs/2026-11-07-manual.md`).
  */
 
 /** Cobradores de ejemplo: el combo del formulario y el join del SQL. */

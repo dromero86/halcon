@@ -32,7 +32,7 @@
  * `usr.session.enable` (`applySessionUser`).
  *
  * `__.session.check()` sigue siendo un stub: el chequeo periodico es del
- * backend y queda fuera de este shim (ver `sdk/compat/README.md`).
+ * backend y queda fuera de este shim (ver SSOT `projects/halcon/docs/2026-11-07-manual.md`).
  */
 
 import { usr, __ } from './globals.js';

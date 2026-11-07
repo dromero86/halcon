@@ -4,7 +4,7 @@
  * Servidor HTTP nativo (`node:http`), sin dependencias, con OAuth simulado y
  * datos estaticos en `mock/data/`. Sirve para probar el modulo de sesion del
  * SDK mientras el backend real no esta en el repositorio; no es el backend
- * definitivo (ver `docs/2026-11-07-api-json.md`).
+ * definitivo (contrato de la API en el SSOT, `projects/halcon/docs/`).
  *
  * Uso como modulo:
  *

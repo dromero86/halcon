@@ -12,7 +12,6 @@
     "sdk/vendor",
     "sdk/compat",
     "mock",
-    "docs",
     "scripts",
     "LICENSE"
   ],

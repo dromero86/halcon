@@ -29,7 +29,5 @@ n=$(grep -l "webix" mock/server.mjs sdk/src/auth/session.js sdk/src/auth/pkce.js
 echo "$n"
 [ "$n" = "0" ] || fallos=$((fallos + 1))
 
-gate doc test -f docs/2026-11-07-api-json.md
-
 echo "gates fallidos: $fallos"
 exit "$fallos"

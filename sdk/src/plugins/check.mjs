@@ -44,8 +44,8 @@
  *    contenedor con scroll horizontal y el ancho minimo, y los botones y
  *    campos declaran 44 px de alto.
  *  - la compatibilidad de navegadores: `browserslist` en `package.json` con las
- *    cuatro familias y la exclusion de IE, el documento de navegadores y el
- *    verificador `scripts/compat.mjs` sin hallazgos ni excepciones sueltas.
+ *    cuatro familias y la exclusion de IE, y el verificador `scripts/compat.mjs`
+ *    sin hallazgos ni excepciones sueltas.
  *
  * Sale 0 si todo esta y 1 si falta algo.
  *
@@ -69,7 +69,7 @@ import * as clientesStore from '../../compat/store/clientes.js';
 import * as listado from '../../compat/store/clientes_listado.js';
 import { validar } from '../rules/clientes.js';
 
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -1721,8 +1721,8 @@ clientesStore.reset();
 
 // --- compatibilidad de navegadores ------------------------------------
 //
-// La matriz vive en `browserslist` (package.json) y se documenta en
-// `docs/2026-11-07-navegadores.md`. El verificador propio revisa `sdk/src` y
+// La matriz vive en `browserslist` (package.json) y se documenta en el SSOT
+// (`projects/halcon/docs/2026-11-07-manual.md`). El verificador propio revisa `sdk/src` y
 // `sdk/compat` en busca de APIs fuera de la matriz, y sus excepciones tienen
 // que estar justificadas: una excepcion sin uso o sin motivo es una regresion
 // futura, asi que tambien hace fallar el check.
@@ -1748,22 +1748,6 @@ exigir(
   `browserslist no excluye Internet Explorer (${paquete.browserslist.join(' | ')})`
 );
 ok(`ok compat: browserslist declara las ultimas 2 versiones de ${FAMILIAS.join(', ')} y excluye IE`);
-
-const rutaDocumento = join(raizRepo, 'docs', '2026-11-07-navegadores.md');
-exigir(existsSync(rutaDocumento), 'falta docs/2026-11-07-navegadores.md');
-
-const documentoNavegadores = readFileSync(rutaDocumento, 'utf8');
-exigir(documentoNavegadores.trim() !== '', 'docs/2026-11-07-navegadores.md esta vacio');
-const familiasDocumentadas = FAMILIAS.filter((familia) => documentoNavegadores.includes(familia));
-exigir(
-  familiasDocumentadas.length === FAMILIAS.length,
-  `el documento de navegadores no nombra ${FAMILIAS.filter((familia) => !familiasDocumentadas.includes(familia)).join(', ')}`
-);
-exigir(
-  documentoNavegadores.includes('npm run compat'),
-  'el documento de navegadores no explica como correr el verificador (npm run compat)'
-);
-ok('ok compat: el documento de navegadores existe y documenta la matriz y el comando');
 
 exigir(REGLAS_COMPAT.length >= 5, `el verificador de compatibilidad declara ${REGLAS_COMPAT.length} reglas`);
 const informeCompat = revisarCompat();
