@@ -9,3 +9,8 @@
 import './halcon.test.js';
 import './auth.test.js';
 import './loader.test.js';
+import './helper.test.js';
+import './b64.test.js';
+import './waves.test.js';
+import './noback.test.js';
+import './session.test.js';

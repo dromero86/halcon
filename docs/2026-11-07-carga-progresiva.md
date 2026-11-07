@@ -188,8 +188,9 @@ scripts diferidos.
 ## Volver al manifiesto heredado
 
 El manifiesto anterior quedo guardado sin cambios en
-`sdk/config/source-legacy.json`: Webix 7, Font Awesome, waves, los plugins y
-`sdk/app/main.js`. Hay dos formas de volver:
+`sdk/config/source-legacy.json`: Webix 7, Font Awesome, waves, los plugins,
+`sys/integrations/databot.js` (alias historicos de `databot`) y `sdk/app/main.js`.
+Hay dos formas de volver:
 
 1. `make legacy` levanta un servidor que sirve `sdk/index.html` con el `bootin`
    apuntando a `source-legacy.json` y resuelve `{url}` y `{rand}` al vuelo.

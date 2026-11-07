@@ -30,7 +30,8 @@ Halcon esta escrito en javascript para soportar [Webix 7+](https://webix.com/)
 
 ### Estructura del repositorio
 
-- `sdk/sys/` — nucleo heredado del framework: loader secuencial (`sys/core/loader.js`), helpers, plugins y widgets. El Webix embebido que queda es la version 7.3.6 (`sys/core/webix/webix_7.js` y `webix_7.css`), que es la que carga el manifiesto de recursos.
+- `sdk/sys/` — nucleo heredado del framework: loader (`sys/core/loader.js`), helper de aplicacion (`sys/core/helper.js`), sesion (`sys/core/session.js`), utilidades (`b64.js`, `waves.js`, `noback.js`), plugins y widgets. El Webix embebido que queda es la version 7.3.6 (`sys/core/webix/webix_7.js` y `webix_7.css`), que es la que carga el manifiesto heredado.
+- `sdk/sys/integrations/` — integraciones opt-in (`firebase`, `databot`) que se registran en `__` pero no forman parte del nucleo ni de la ruta nueva.
 - `sdk/src/` — paquete publico `@halcon/sdk`: `halcon.js` es el punto de entrada unico y `version.js` publica la version. Las capas del paquete son `core/index.js` (API del vendor, `register` e `init`), `widgets/index.js` (registro de `mainbar`, `formview` y `datalist`) y `app/index.js` (pantallas registradas en `app`).
 - `test/` — tests del paquete con el runner nativo de Node (`node --test test/`), sin dependencias.
 - `sdk/compat/` — capa de migracion: shim de compatibilidad Webix sobre Zorzal (`webix-shim.js`, `app-shim.js`, `session-shim.js`, `theme.css`), paginas migradas y un pequeno almacen de datos. Documentada en `sdk/compat/README.md`.
