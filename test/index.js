@@ -8,3 +8,4 @@
 
 import './halcon.test.js';
 import './auth.test.js';
+import './loader.test.js';

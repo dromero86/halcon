@@ -20,11 +20,11 @@ Halcon esta escrito en javascript para soportar [Webix 7+](https://webix.com/)
 
 #### Tareas de Halcon
 
-- [x] Gestionar la carga secuencial de recursos js, css, json, ico, jpg, png, gif, svg.
-- [x] Actuar como "Module loader" de recursos js simil [RequireJS](https://requirejs.org/) 
-- [x] Generar un preloading mientras se cargan los recursos
-- [x] Evitar el cache agregando el parametro extra "refresh=hash()"
-- [x] Detectar el dispositivo para ajustarse a la visualizacion
+- [x] Gestionar la carga de recursos js, css, json, ico, jpg, png, gif, svg.
+- [x] Actuar como "Module loader" de recursos js simil [RequireJS](https://requirejs.org/), con `app.define` / `app.require` como puente de compatibilidad.
+- [x] Generar un preloading mientras se cargan los recursos.
+- [x] Politica de cache explicita (`versioned`, `immutable`, `reload`, `no-store`) con un sello por arranque, sin `Date.now()` por recurso.
+- [x] Detectar el dispositivo con `matchMedia` / `maxTouchPoints` y viewport seguro (sin `user-scalable=no`).
 - [x] Generar metodos helper de url como base_url, req, GET, POST entre otros.
 - [x] Mostrar path con el stilo de java "sdk.my_dir.my_other_dir"  
 
@@ -36,10 +36,9 @@ Halcon esta escrito en javascript para soportar [Webix 7+](https://webix.com/)
 - `sdk/compat/` — capa de migracion: shim de compatibilidad Webix sobre Zorzal (`webix-shim.js`, `app-shim.js`, `session-shim.js`, `theme.css`), paginas migradas y un pequeno almacen de datos. Documentada en `sdk/compat/README.md`.
 - `sdk/vendor/zorzal/` — dependencia vendorizada del motor Zorzal (JS y CSS) que consume `sdk/compat/`.
 - `sdk/app/` — aplicacion heredada (dashboard, settings y el ABM de clientes en `sdk/app/abm/`) y el arranque nuevo: `bootstrap.js` (shim de `app`, shim de sesion y montaje de login o shell) y `main-zorzal.js` (modulo ESM que el manifiesto carga).
-- `sdk/config/` — `source.json` (manifiesto de recursos que carga el loader, hoy sobre Zorzal), `source-legacy.json` (el manifiesto anterior, con Webix, para volver atras) y `app.json` (configuracion de la aplicacion).
+- `sdk/config/` — `source.json` (manifiesto v2 de recursos que carga el loader, hoy sobre Zorzal), `loader.schema.json` (esquema del manifiesto v2), `source-legacy.json` (el manifiesto v1 anterior, con Webix, para volver atras) y `app.json` (configuracion de la aplicacion).
 - `sdk/ui/` — estilos e imagenes compartidas (admin, sidebar, waves, Font Awesome).
-- `sdk/*.html` — puntos de entrada: `index.html` (aplicacion) y los pilotos `pilot.html`, `pilot-plugins.html`, `pilot-dashboard.html` (paginas de verificacion manual de la migracion).
-- `examples/` — indice de los tres pilotos con su URL y como levantarlos con `make demo`. Los pilotos viven en `sdk/` y no se copian aca.
+- `sdk/index.html` — unica entrada de la aplicacion: instancia el loader y le pasa el manifiesto; el resto de la pagina lo arma el loader.
 - `package.json` — manifiesto del paquete `@halcon/sdk`: entry, exports, `files` (que se publica), script de tests y engines.
 - `README.md` — este manual. `sdk/compat/README.md` — documentacion del shim. `LIMPIEZA-FASE1.md` — informe de la limpieza de duplicados de Webix.
 

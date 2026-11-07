@@ -1,0 +1,164 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/dromero86/halcon/sdk/config/loader.schema.json",
+    "title": "Manifiesto del loader de Halcon",
+    "description": "Manifiesto v2 de recursos de una aplicacion Halcon. El loader tambien acepta el formato v1 (array de recursos) para compatibilidad.",
+    "type": "object",
+    "required": ["resources"],
+    "additionalProperties": false,
+    "properties": {
+        "version": {
+            "type": "string",
+            "description": "Version del formato del manifiesto. El loader acepta '2' y trata un array como v1.",
+            "default": "2"
+        },
+        "base": {
+            "type": "string",
+            "description": "Prefijo de las rutas relativas. Si se omite se usa `project-path` del <script> del loader."
+        },
+        "cache": {
+            "description": "Politica de cache por omision. `false` desactiva el cache; `true` usa versionado.",
+            "oneOf": [
+                { "type": "boolean" },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "policy": {
+                            "type": "string",
+                            "enum": ["versioned", "immutable", "none", "reload", "no-store", "dev"],
+                            "default": "versioned"
+                        },
+                        "version": {
+                            "type": "string",
+                            "description": "Sello de build. `auto` usa `data-version` del <script> del loader. Sin version no se agrega query: manda el cache HTTP."
+                        }
+                    }
+                }
+            ]
+        },
+        "viewport": {
+            "description": "Viewport que aplica el loader. `false` no toca el meta; un objeto se traduce a content=.",
+            "oneOf": [
+                { "type": "boolean" },
+                { "type": "string" },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "width": { "type": "string", "default": "device-width" },
+                        "initialScale": { "type": ["number", "string"] },
+                        "maximumScale": { "type": ["number", "string"] },
+                        "minimumScale": { "type": ["number", "string"] },
+                        "userScalable": { "type": "boolean" },
+                        "fit": { "type": "string", "enum": ["auto", "contain", "cover"] }
+                    }
+                }
+            ]
+        },
+        "parallel": {
+            "type": "boolean",
+            "description": "Si es true, los recursos sin dependencias se cargan en paralelo. Si es false, se respeta el orden del array.",
+            "default": false
+        },
+        "concurrency": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "description": "Maximo de cargas simultaneas cuando `parallel` es true.",
+            "default": 6
+        },
+        "strict": {
+            "type": "boolean",
+            "description": "Si es true, el primer recurso obligatorio que falla corta el arranque.",
+            "default": false
+        },
+        "clean": {
+            "type": "boolean",
+            "description": "Si es true, al terminar la carga se vacia el body. Por omision no se toca el HTML de la pagina.",
+            "default": false
+        },
+        "resources": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/resource" }
+        }
+    },
+    "$defs": {
+        "resource": {
+            "type": "object",
+            "required": ["url"],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Identificador unico. Se usa para `deps`, `unload` y diagnostico. Por omision se deriva de la URL."
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["script", "module", "css", "json", "icon", "template", "image", "preload", "prefetch", "modulepreload"],
+                    "description": "Tipo de recurso. `tag` se acepta como alias v1; si se omite se infiere por extension."
+                },
+                "tag": {
+                    "type": "string",
+                    "description": "Alias v1 de `type`."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "Ruta relativa a `base` / `project-path`, o URL absoluta."
+                },
+                "cache": {
+                    "description": "Politica de cache de este recurso. `false` agrega un sello unico del arranque.",
+                    "oneOf": [
+                        { "type": "boolean" },
+                        {
+                            "type": "string",
+                            "enum": ["versioned", "immutable", "none", "reload", "no-store", "dev"]
+                        }
+                    ]
+                },
+                "deps": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Ids que deben estar resueltos antes de cargar este recurso."
+                },
+                "media": {
+                    "type": "string",
+                    "description": "Atributo media para CSS y pistas de precarga."
+                },
+                "condition": {
+                    "description": "Condicion de carga: mobile, desktop, touch, dark, light, reduced-motion o una media query.",
+                    "oneOf": [
+                        { "type": "string" },
+                        { "type": "array", "items": { "type": "string" } }
+                    ]
+                },
+                "optional": {
+                    "type": "boolean",
+                    "description": "Si es true, un fallo no marca el arranque como fallido.",
+                    "default": false
+                },
+                "retry": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "description": "Reintentos ante error o timeout."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Milisegundos antes de abortar la carga."
+                },
+                "integrity": { "type": "string", "description": "Subresource Integrity (sha384-...)." },
+                "crossorigin": { "type": "string", "enum": ["anonymous", "use-credentials"] },
+                "referrerpolicy": { "type": "string" },
+                "fetchpriority": { "type": "string", "enum": ["high", "low", "auto"] },
+                "nonce": { "type": "string", "description": "Nonce de CSP para el elemento." },
+                "as": { "type": "string", "description": "Valor de `as` para type=preload." },
+                "fallback": {
+                    "type": "string",
+                    "description": "Solo type=module: script clasico a cargar si el navegador no soporta ESM."
+                }
+            }
+        }
+    }
+}

@@ -1,7 +1,43 @@
-[
-    { "tag" : "json"   , "cache": true, "url": "config/app.json"                  },
-    { "tag" : "icon"   , "cache": true, "url": "ui/img/favicon.ico"               },
-    { "tag" : "link"   , "cache": true, "url": "vendor/zorzal/src/zorzal.css"     },
-    { "tag" : "link"   , "cache": true, "url": "compat/theme.css"                 },
-    { "tag" : "script" , "cache": true, "url": "app/main-zorzal.js", "module": true }
-]
+{
+    "version": "2",
+    "cache": {
+        "policy": "versioned"
+    },
+    "viewport": {
+        "width": "device-width",
+        "initialScale": 1
+    },
+    "parallel": true,
+    "concurrency": 4,
+    "clean": false,
+    "resources": [
+        {
+            "id": "app-config",
+            "type": "json",
+            "url": "config/app.json"
+        },
+        {
+            "id": "favicon",
+            "type": "icon",
+            "url": "ui/img/favicon.ico"
+        },
+        {
+            "id": "zorzal",
+            "type": "css",
+            "url": "vendor/zorzal/src/zorzal.css",
+            "cache": "immutable"
+        },
+        {
+            "id": "theme",
+            "type": "css",
+            "url": "compat/theme.css",
+            "deps": ["zorzal"]
+        },
+        {
+            "id": "app",
+            "type": "module",
+            "url": "app/main-zorzal.js",
+            "deps": ["app-config", "zorzal", "theme"]
+        }
+    ]
+}
