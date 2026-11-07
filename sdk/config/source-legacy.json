@@ -1,0 +1,19 @@
+[
+    { "tag" : "json"   , "cache": true, "url": "config/app.json"          },
+    { "tag" : "icon"   , "cache": true, "url": "ui/img/favicon.ico"       },
+    { "tag" : "link"   , "cache": true, "url": "sys/core/webix/webix_7.css" },
+    { "tag" : "link"   , "cache": true, "url": "ui/css/font_awesome/css/font-awesome.min.css"   },
+    { "tag" : "link"   , "cache": true, "url": "ui/css/sidebar.css"       },
+    { "tag" : "link"   , "cache": true, "url": "ui/css/waves.css"         },
+    { "tag" : "link"   , "cache": true, "url": "ui/css/admin.css"         },
+    { "tag" : "script" , "cache": true, "url": "sys/core/webix/webix_7.js"  },
+    { "tag" : "script" , "cache": true, "url": "sys/core/b64.js"          },
+    { "tag" : "script" , "cache": true, "url": "sys/core/helper.js"       },
+    { "tag" : "script" , "cache": true, "url": "sys/core/noback.js"       },
+    { "tag" : "script" , "cache": true, "url": "sys/core/waves.js"        },
+    { "tag" : "script" , "cache": true, "url": "sys/plugins/mainbar.js"   },
+    { "tag" : "script" , "cache": true, "url": "sys/plugins/datalist.js"  },
+    { "tag" : "script" , "cache": true, "url": "sys/plugins/formview.js"  },
+    { "tag" : "script" , "cache": true, "url": "sys/plugins/cards.js"     },
+    { "tag" : "script" , "cache": true, "url": "app/main.js"              }
+]

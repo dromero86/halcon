@@ -66,6 +66,116 @@
 
   --hc-button-bg: #ffffff;
   --hc-button-text: #1d2430;
+
+  /*
+   * Mapeo de los tokens de Zorzal a los de Halcon.
+   *
+   * El widget set lee `--z-*`; el theme define `--hc-*`. Con esta indireccion,
+   * cambiar el tema reescribe solo los `--hc-*` y todos los widgets siguen el
+   * tema sin tocar sus reglas.
+   */
+  --z-bg: var(--hc-bg);
+  --z-surface: var(--hc-surface);
+  --z-surface-2: var(--hc-surface-2);
+  --z-border: var(--hc-border);
+  --z-text: var(--hc-text);
+  --z-muted: var(--hc-muted);
+  --z-primary: var(--hc-primary);
+  --z-primary-text: var(--hc-primary-text);
+  --z-danger: var(--hc-danger);
+  --z-text-bg: var(--hc-surface);
+  --z-text-border: var(--hc-border);
+  --z-text-placeholder: var(--hc-muted);
+  --z-radius: var(--hc-radius);
+  --z-radius-sm: var(--hc-radius-sm);
+  --z-space: var(--hc-space);
+}
+
+/*
+ * Tema oscuro.
+ *
+ * Redefine los mismos tokens de color que `:root`, sin duplicar reglas de
+ * componentes: el resto del theme sigue leyendo las variables y no sabe en que
+ * tema esta. El atributo lo escribe la mainbar (`data-theme` en el elemento
+ * raiz) y la eleccion se guarda en `localStorage` con la clave `hc-theme`.
+ *
+ * `color-scheme` avisa al navegador para que los controles nativos (scroll,
+ * campos, autocompletado) acompanen el tema.
+ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --hc-bg: #12161d;
+  --hc-surface: #1a1f27;
+  --hc-surface-2: #232931;
+  --hc-border: #333b46;
+  --hc-text: #e6e9ee;
+  --hc-muted: #a3adba;
+
+  --hc-primary: #2b64e0;
+  --hc-primary-text: #ffffff;
+  --hc-danger: #f07f71;
+
+  --hc-mainbar-bg: #0e1218;
+  --hc-mainbar-text: #e6e9ee;
+  --hc-mainbar-hover: rgba(255, 255, 255, 0.1);
+
+  --hc-sidebar-bg: #161b23;
+  --hc-sidebar-text: #cfd6df;
+  --hc-sidebar-muted: #98a3b1;
+  --hc-sidebar-active-bg: #1a7a42;
+  --hc-sidebar-active-text: #ffffff;
+  --hc-sidebar-hover: rgba(255, 255, 255, 0.06);
+
+  --hc-table-head-bg: #1f252e;
+  --hc-table-head-text: #a3adba;
+  --hc-table-row-hover: #202630;
+  --hc-table-border: #333b46;
+
+  --hc-button-bg: #232931;
+  --hc-button-text: #e6e9ee;
+}
+
+/*
+ * Sin eleccion explicita manda el sistema. El bloque repite los valores del
+ * tema oscuro porque CSS no permite compartir declaraciones entre un selector
+ * y un media query; el check compara ambos bloques token por token para que no
+ * se desincronicen.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --hc-bg: #12161d;
+    --hc-surface: #1a1f27;
+    --hc-surface-2: #232931;
+    --hc-border: #333b46;
+    --hc-text: #e6e9ee;
+    --hc-muted: #a3adba;
+
+    --hc-primary: #2b64e0;
+    --hc-primary-text: #ffffff;
+    --hc-danger: #f07f71;
+
+    --hc-mainbar-bg: #0e1218;
+    --hc-mainbar-text: #e6e9ee;
+    --hc-mainbar-hover: rgba(255, 255, 255, 0.1);
+
+    --hc-sidebar-bg: #161b23;
+    --hc-sidebar-text: #cfd6df;
+    --hc-sidebar-muted: #98a3b1;
+    --hc-sidebar-active-bg: #1a7a42;
+    --hc-sidebar-active-text: #ffffff;
+    --hc-sidebar-hover: rgba(255, 255, 255, 0.06);
+
+    --hc-table-head-bg: #1f252e;
+    --hc-table-head-text: #a3adba;
+    --hc-table-row-hover: #202630;
+    --hc-table-border: #333b46;
+
+    --hc-button-bg: #232931;
+    --hc-button-text: #e6e9ee;
+  }
 }
 
 /* --- contenedor ------------------------------------------------------ */
@@ -190,6 +300,56 @@
   min-width: 64px;
   font-size: 12px;
   letter-spacing: 0.02em;
+}
+
+/* --- sesion de la mainbar -------------------------------------------- */
+
+/*
+ * Bloque de sesion al final de la mainbar: nombre del usuario y boton Salir.
+ * Se separa del resto con una linea y no compite con el spacer, que ya empuja
+ * los controles a la derecha.
+ */
+.hc-mainbar__sesion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
+  padding-left: 10px;
+  border-left: 1px solid var(--hc-mainbar-hover);
+}
+
+.hc-mainbar__usuario {
+  max-width: 160px;
+  overflow: hidden;
+  color: var(--hc-mainbar-text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hc-mainbar__salir {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--hc-radius-sm);
+  background: transparent;
+  color: var(--hc-mainbar-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.hc-mainbar__salir:hover {
+  background: var(--hc-mainbar-hover);
+}
+
+.hc-mainbar__salir:focus-visible {
+  outline: 2px solid var(--hc-primary);
+  outline-offset: 2px;
+}
+
+.hc-mainbar__salir:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 /* --- sidebar --------------------------------------------------------- */
@@ -406,6 +566,149 @@
   color: var(--hc-text);
 }
 
+/*
+ * Contenedor de la tabla del listado: scrollea solo en horizontal y acota su
+ * ancho al del panel, de modo que la pagina nunca desborda. La tabla conserva
+ * un ancho minimo para no comprimir las siete columnas (checkbox + seis).
+ */
+.hc-lista__contenedor {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hc-page--clientes .hc-lista__tabla {
+  min-width: 720px;
+}
+
+/*
+ * Aviso persistente del listado: permiso insuficiente o API caida. Es un
+ * bloque informativo, no un error bloqueante: el listado sigue usable.
+ */
+.hc-lista__aviso {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--hc-border);
+  border-left: 3px solid #b7791f;
+  border-radius: var(--hc-radius-sm);
+  background: var(--hc-surface-2);
+  color: var(--hc-text);
+  font-size: 13px;
+}
+
+/* --- login ----------------------------------------------------------- */
+
+.hc-page--login {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 32px;
+}
+
+.hc-login {
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  border: 1px solid var(--hc-border);
+  border-radius: var(--hc-radius);
+  background: var(--hc-surface);
+  color: var(--hc-text);
+  box-shadow: var(--hc-shadow);
+}
+
+.hc-login__titulo {
+  margin: 0 0 4px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.hc-login__subtitulo {
+  margin: 0 0 16px;
+  color: var(--hc-muted);
+  font-size: 13px;
+}
+
+.hc-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hc-login__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hc-login__etiqueta {
+  color: var(--hc-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hc-login__input {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--hc-border);
+  border-radius: var(--hc-radius-sm);
+  background: var(--hc-surface);
+  color: var(--hc-text);
+  font: inherit;
+}
+
+.hc-login__input:focus-visible {
+  outline: 2px solid var(--hc-primary);
+  outline-offset: 1px;
+}
+
+.hc-login__entrar {
+  min-height: 40px;
+  margin-top: 4px;
+}
+
+.hc-login__error {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--hc-danger);
+  border-radius: var(--hc-radius-sm);
+  background: var(--hc-surface-2);
+  color: var(--hc-danger);
+  font-size: 13px;
+}
+
+.hc-login__aviso {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--hc-border);
+  border-left: 3px solid #b7791f;
+  border-radius: var(--hc-radius-sm);
+  background: var(--hc-surface-2);
+  color: var(--hc-text);
+  font-size: 13px;
+}
+
+.hc-login__pie {
+  margin: 16px 0 0;
+  color: var(--hc-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .hc-page--login {
+    padding: 8px 0 24px;
+  }
+
+  .hc-login {
+    padding: 18px;
+  }
+
+  .hc-login__input,
+  .hc-login__entrar {
+    min-height: 44px;
+  }
+}
+
 /* El datatable de Zorzal hereda los mismos colores dentro del dashboard. */
 .hc-dashboard .z-datatable__table {
   border: 1px solid var(--hc-table-border);
@@ -506,16 +809,6 @@
     max-width: 100%;
   }
 
-  /* La tabla conserva su ancho util y hace scroll dentro del panel. */
-  .hc-page--clientes .z-datatable {
-    max-width: 100%;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .hc-page--clientes .z-datatable__table {
-    min-width: 680px;
-  }
-
   .hc-page--clientes .z-toolbar,
   .hc-page--clientes-form .z-toolbar {
     flex-wrap: wrap;
@@ -577,8 +870,37 @@
     font-size: var(--hc-title-size);
   }
 
-  .hc-page--clientes .z-datatable__table {
-    min-width: 620px;
+  /*
+   * Formulario de clientes en una columna: cada campo ocupa el ancho completo
+   * y la separacion vertical sale del gap del grid.
+   */
+  .hc-page--clientes-form .z-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .hc-page--clientes-form .hc-campo,
+  .hc-page--clientes-form .z-forminput,
+  .hc-page--clientes-form .z-text__input,
+  .hc-page--clientes-form .z-select-control,
+  .hc-page--clientes-form .z-select-control__input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /*
+   * Controles tactiles de 44 px de alto minimo: botones y campos de entrada.
+   * Los enlaces de texto (`.hc-resumen__enlace`) y los iconos de fila no
+   * entran en la regla.
+   */
+  .hc-dashboard .z-button,
+  .hc-dashboard .z-toolbar__button,
+  .hc-dashboard .z-text__input,
+  .hc-dashboard .z-select-control__input,
+  .hc-dashboard .hc-lista__busqueda,
+  .hc-dashboard .hc-lista__por-pagina {
+    min-height: 44px;
   }
 }
-

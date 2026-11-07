@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 PYTHON   ?= python3
 PORT     ?= 8090
+MOCK_PORT ?= 7071
 BIND     ?= 0.0.0.0
 TS_HOST  ?= n53s.tail49474.ts.net
 
@@ -11,11 +12,11 @@ PID_FILE := $(RUN_DIR)/serve.pid
 LOG_FILE := $(RUN_DIR)/serve.log
 
 PILOTS := sdk/pilot.html sdk/pilot-plugins.html sdk/pilot-dashboard.html
-ASSETS := sdk/vendor/zorzal/src/zorzal.css sdk/compat/webix-shim.js sdk/compat/theme.css
+ASSETS := sdk/vendor/zorzal/src/zorzal.css sdk/compat/theme.css sdk/compat/pages/inicio.js sdk/compat/pages/estados.js
 
 .DEFAULT_GOAL := help
 
-.PHONY: help serve start stop restart status logs check urls tailscale-up tailscale-down doctor clean
+.PHONY: help serve legacy mock demo start stop restart status logs check urls tailscale-up tailscale-down doctor clean
 
 help: ## Muestra esta ayuda
 	@echo "Halcón · servidor de desarrollo"
@@ -27,8 +28,74 @@ help: ## Muestra esta ayuda
 	@echo "Pilotos:   $(PILOTS)"
 
 serve: ## Sirve el repo en primer plano (Ctrl+C para cortar)
-	@echo "Halcón en http://$(BIND):$(PORT)/ · Ctrl+C para cortar"
-	@exec $(PYTHON) -m http.server $(PORT) --bind $(BIND) --directory $(ROOT)
+	@echo "Halcon en http://$(BIND):$(PORT)/sdk/index.html - Ctrl+C para cortar"
+	@exec node scripts/serve.mjs $(PORT) --bind $(BIND)
+
+legacy: ## Sirve el arranque heredado de Webix (source-legacy.json) en primer plano
+	@echo "Halcón heredado en http://$(BIND):$(PORT)/ · Ctrl+C para cortar"
+	@echo "Manifiesto: sdk/config/source-legacy.json"
+	@exec $(PYTHON) -c 'import sys; \
+exec("\n".join([ \
+	"from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer", \
+	"import os, sys, time", \
+	"raiz, bind, puerto = sys.argv[1], sys.argv[2], int(sys.argv[3])", \
+	"html = open(os.path.join(raiz, \"sdk\", \"index.html\"), encoding=\"utf-8\").read()", \
+	"html = html.replace(\"config/source.json\", \"config/source-legacy.json\").replace(\"{url}\", \"\")", \
+	"class H(SimpleHTTPRequestHandler):", \
+	"    def __init__(self, *a, **k):", \
+	"        super().__init__(*a, directory=raiz, **k)", \
+	"    def do_GET(self):", \
+	"        ruta = self.path.split(\"?\")[0]", \
+	"        if ruta == \"/\":", \
+	"            datos = html.replace(\"{rand}\", str(int(time.time()))).encode(\"utf-8\")", \
+	"            self.send_response(200)", \
+	"            self.send_header(\"Content-Type\", \"text/html; charset=utf-8\")", \
+	"            self.send_header(\"Content-Length\", str(len(datos)))", \
+	"            self.end_headers()", \
+	"            self.wfile.write(datos)", \
+	"            return", \
+	"        if ruta in (\"/index.html\", \"/sdk/index.html\"):", \
+	"            self.send_response(302)", \
+	"            self.send_header(\"Location\", \"/\")", \
+	"            self.send_header(\"Content-Length\", \"0\")", \
+	"            self.end_headers()", \
+	"            return", \
+	"        super().do_GET()", \
+	"    def log_message(self, formato, *a):", \
+	"        pass", \
+	"ThreadingHTTPServer((bind, puerto), H).serve_forever()", \
+]))' "$(ROOT)" "$(BIND)" $(PORT)
+
+mock: ## Levanta el emulador de la API en primer plano (Ctrl+C para cortar)
+	@echo "Emulador Halcón en http://127.0.0.1:$(MOCK_PORT)/ · Ctrl+C para cortar"
+	@exec env MOCK_PORT=$(MOCK_PORT) node mock/server.mjs
+
+demo: ## Levanta el emulador y el servidor de desarrollo juntos (Ctrl+C para cortar)
+	@echo "Halcón demo: emulador en http://127.0.0.1:$(MOCK_PORT)/ y servidor en http://$(BIND):$(PORT)/"
+	@echo "Piloto:      http://127.0.0.1:$(PORT)/sdk/pilot-dashboard.html?api=http://127.0.0.1:$(MOCK_PORT)"
+	@set -e; \
+	env MOCK_PORT=$(MOCK_PORT) node mock/server.mjs & mock=$$!; \
+	$(PYTHON) -m http.server $(PORT) --bind $(BIND) --directory $(ROOT) & serve=$$!; \
+	trap 'kill $$mock $$serve 2>/dev/null; wait $$mock $$serve 2>/dev/null' INT TERM EXIT; \
+	listo=0; \
+	for i in $$(seq 1 40); do \
+		if curl -fsS -o /dev/null "http://127.0.0.1:$(PORT)/sdk/pilot-dashboard.html" 2>/dev/null \
+			&& curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$(MOCK_PORT)/api/me" 2>/dev/null | grep -q 401; then \
+			listo=1; \
+			break; \
+		fi; \
+		if ! kill -0 $$mock 2>/dev/null || ! kill -0 $$serve 2>/dev/null; then \
+			break; \
+		fi; \
+		sleep 0.25; \
+	done; \
+	if [ $$listo -eq 1 ]; then \
+		echo "Demo lista: Ctrl+C corta el emulador y el servidor"; \
+	else \
+		echo "ERROR: el emulador o el servidor no respondieron"; \
+		exit 1; \
+	fi; \
+	wait
 
 start: ## Arranca el servidor en segundo plano
 	@mkdir -p $(RUN_DIR)

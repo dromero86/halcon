@@ -1,0 +1,38 @@
+{
+  "name": "@halcon/sdk",
+  "version": "0.1.0",
+  "description": "SDK de Halcon sobre Zorzal: punto de entrada unico, init(config) y registro de kinds.",
+  "type": "module",
+  "main": "./sdk/src/halcon.js",
+  "exports": {
+    ".": "./sdk/src/halcon.js"
+  },
+  "files": [
+    "sdk/src",
+    "sdk/vendor",
+    "sdk/compat",
+    "mock",
+    "docs",
+    "scripts",
+    "LICENSE"
+  ],
+  "scripts": {
+    "mock": "node mock/server.mjs",
+    "test": "node --test test/",
+    "lint": "node scripts/lint.mjs",
+    "compat": "node scripts/compat.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "npm run lint && npm run compat && npm test"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Edge versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "not ie <= 11"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

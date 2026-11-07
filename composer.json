@@ -13,8 +13,5 @@
             "role": "Original Developer"
         }
     ],
-    "require": 
-	{ 
-        "composer/installers": "~1.0"
-    }
+    "require": {}
 }

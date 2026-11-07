@@ -24,10 +24,15 @@
  * datos, o el JSON es invalido, se usa el usuario demo. No se escribe en
  * `localStorage`: en la aplicacion real la sesion la crea el backend.
  *
- * IMPORTANTE: el backend real no esta conectado. `usr.session.enable` queda en
- * `false` y `__.session.check()` solo avisa; el login, el chequeo periodico y
- * el logout son los de `sdk/sys/core/session.js`, que quedan fuera de este
- * shim (ver `sdk/compat/README.md`).
+ * Sesion contra el emulador: el piloto no usa el login del backend PHP pero si
+ * una sesion OAuth real contra `mock/server.mjs`. Este modulo guarda esa
+ * sesion (`setSession`/`getSession`) para que el login la cree una sola vez y
+ * el shell y el listado la compartan, resuelve la URL base de la API
+ * (`resolveApiBase`) y refleja el usuario autenticado en `usr.name` y
+ * `usr.session.enable` (`applySessionUser`).
+ *
+ * `__.session.check()` sigue siendo un stub: el chequeo periodico es del
+ * backend y queda fuera de este shim (ver `sdk/compat/README.md`).
  */
 
 import { usr, __ } from './globals.js';
@@ -138,6 +143,91 @@ export function applySession(stored) {
 /** Aplica `localStorage` si hay datos y, si no, el usuario demo. */
 export const session = applySession(readStoredSession());
 
+/** URL por defecto del emulador de la API. */
+export const API_POR_DEFECTO = 'http://127.0.0.1:7071';
+
+/**
+ * Saca las barras finales de una URL base.
+ * @param {unknown} base
+ * @returns {string}
+ */
+function sinBarraFinal(base) {
+  return String(base).replace(/\/+$/, '');
+}
+
+/**
+ * URL base de la API del piloto.
+ *
+ * Orden: el parametro `?api=` de la query gana sobre `window.HALCON_API` y,
+ * sin ninguno de los dos, se usa el emulador local. La lectura de `location`
+ * esta dentro de la funcion (nunca al importar), para que el modulo cargue en
+ * Node y en las pruebas.
+ *
+ * @param {{ search?: string, env?: Record<string, any> }} [options]
+ * @returns {string}
+ */
+export function resolveApiBase(options = {}) {
+  const env = options.env || (typeof globalThis === 'undefined' ? {} : globalThis);
+  let search = options.search;
+  if (typeof search !== 'string') {
+    const location = env && env.location;
+    search = location && typeof location.search === 'string' ? location.search : '';
+  }
+
+  let base = '';
+  if (search !== '') {
+    try {
+      const pedido = new URLSearchParams(search).get('api');
+      if (pedido) base = pedido.trim();
+    } catch (error) {
+      base = '';
+    }
+  }
+  if (base === '' && env && typeof env.HALCON_API === 'string') base = env.HALCON_API.trim();
+  if (base === '') base = API_POR_DEFECTO;
+  return sinBarraFinal(base);
+}
+
+/** @type {any|null} */
+let sesionActual = null;
+
+/**
+ * Registra la sesion del piloto. La crea el login y la leen el shell y el
+ * listado: una sola sesion por pagina.
+ *
+ * @param {unknown} sesion
+ * @returns {any|null}
+ */
+export function setSession(sesion) {
+  sesionActual = sesion && typeof sesion === 'object' ? sesion : null;
+  return sesionActual;
+}
+
+/** @returns {any|null} la sesion registrada, o `null` si todavia no hay */
+export function getSession() {
+  return sesionActual;
+}
+
+/**
+ * Refleja el estado de la sesion en los globales: `usr.name` pasa a ser el
+ * usuario autenticado y `usr.session.enable` queda en `true`. Sin sesion
+ * vuelve al usuario demo y apaga la marca.
+ *
+ * @param {{ status?: string, user?: string|null }|null} [estado]
+ * @returns {string} nombre visible
+ */
+export function applySessionUser(estado) {
+  const usuario = estado && typeof estado.user === 'string' ? estado.user.trim() : '';
+  const autenticado = Boolean(estado && estado.status === 'authenticated' && usuario !== '');
+  usr.name = autenticado ? usuario : 'demo';
+  usr.session = {
+    ...DEMO_SESSION,
+    ...(usr.session && typeof usr.session === 'object' ? usr.session : {}),
+    enable: autenticado,
+  };
+  return usr.name;
+}
+
 /**
  * Publica `usr` y `__` en el objeto indicado (`globalThis` por omision).
  * El piloto lo usa para dejar `window.usr` y `window.__` como en la
@@ -155,4 +245,17 @@ export function installSession(target = typeof globalThis === 'undefined' ? {} :
 
 export { usr, __ };
 
-export default { usr, __, session, installSession, readStoredSession, applySession, STORAGE_KEY };
+export default {
+  usr,
+  __,
+  session,
+  installSession,
+  readStoredSession,
+  applySession,
+  resolveApiBase,
+  setSession,
+  getSession,
+  applySessionUser,
+  API_POR_DEFECTO,
+  STORAGE_KEY,
+};

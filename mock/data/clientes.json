@@ -1,0 +1,82 @@
+{
+  "clientes": [
+    {
+      "id": 1,
+      "apellido": "Perez",
+      "nombre": "Juan",
+      "cliente": "Perez Juan",
+      "addr": "Av. Siempre Viva 742",
+      "doc": "30111222",
+      "tel": "11 5555-1001",
+      "fingreso": "2021-03-15",
+      "saldo": 12500.5,
+      "id_cobrador": "1",
+      "cobrador": "Gomez Ana"
+    },
+    {
+      "id": 2,
+      "apellido": "Rodriguez",
+      "nombre": "Maria",
+      "cliente": "Rodriguez Maria",
+      "addr": "Calle Falsa 123",
+      "doc": "27888999",
+      "tel": "11 5555-1002",
+      "fingreso": "2022-07-01",
+      "saldo": 0,
+      "id_cobrador": "2",
+      "cobrador": "Lopez Beto"
+    },
+    {
+      "id": 3,
+      "apellido": "Fernandez",
+      "nombre": "Carlos",
+      "cliente": "Fernandez Carlos",
+      "addr": "Mitre 450",
+      "doc": "32444555",
+      "tel": "11 5555-1003",
+      "fingreso": "2023-01-20",
+      "saldo": 8300,
+      "id_cobrador": "1",
+      "cobrador": "Gomez Ana"
+    },
+    {
+      "id": 4,
+      "apellido": "Silva",
+      "nombre": "Lucia",
+      "cliente": "Silva Lucia",
+      "addr": "San Martin 88",
+      "doc": "35666777",
+      "tel": "11 5555-1004",
+      "fingreso": "2023-11-05",
+      "saldo": 0,
+      "id_cobrador": "3",
+      "cobrador": "Diaz Carla"
+    },
+    {
+      "id": 5,
+      "apellido": "Torres",
+      "nombre": "Pedro",
+      "cliente": "Torres Pedro",
+      "addr": "Belgrano 1020",
+      "doc": "29888777",
+      "tel": "11 5555-1005",
+      "fingreso": "2024-05-12",
+      "saldo": 2450.75,
+      "id_cobrador": "2",
+      "cobrador": "Lopez Beto"
+    },
+    {
+      "id": 6,
+      "apellido": "Acosta",
+      "nombre": "Valeria",
+      "cliente": "Acosta Valeria",
+      "addr": "Rivadavia 3250",
+      "doc": "33111999",
+      "tel": "11 5555-1006",
+      "fingreso": "2024-09-30",
+      "saldo": 4975.25,
+      "id_cobrador": "3",
+      "cobrador": "Diaz Carla"
+    }
+  ]
+}

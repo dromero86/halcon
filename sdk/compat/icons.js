@@ -1,174 +1,56 @@
 /**
- * Fachada de iconos de Halcon sobre el set SVG de Zorzal.
+ * Iconos de Halcon resueltos con el servicio `icons` de Zorzal.
  *
- * Halcon guarda en su menu y en sus plugins nombres cortos ("bars", "cog",
- * "dashboard") o nombres heredados con prefijo (`fa-`, `wxi-`). Este modulo
- * concentra la traduccion a los nombres del servicio de iconos de Zorzal
+ * No hay fuente de iconos ni tabla de equivalencias con Font Awesome: el
+ * nombre se resuelve contra el set de Zorzal
  * (`sdk/vendor/zorzal/src/services/icons.js`), que dibuja trazos SVG sobre una
- * grilla de 24x24. No hay fuente de iconos: los iconos son paths y el color
- * sale de `currentColor`, asi que heredan el color del texto.
+ * grilla de 24x24 con `stroke: currentColor`. Los alias del set (`bars` ->
+ * `menu`) y el icono por defecto (`dot`) son los de Zorzal.
  *
  * Superficie:
  *
- *  - `resolveIconName(name)`: nombre del set de Zorzal que corresponde al
- *    nombre de Halcon. Un nombre desconocido resuelve al icono por defecto del
- *    set (`dot`), igual que el widget `icon` de Zorzal.
- *  - `renderIcon(name, options)`: elemento `svg` 24x24 con los paths del set.
+ *  - `resolveIconName(name)`: nombre del set que corresponde al pedido.
+ *  - `renderIcon(name, options)`: nodo `svg` 24x24 con los paths del set.
  *  - `paintIcon(host, name, options)`: reemplaza el contenido de un nodo por el
  *    `svg` y deja el nombre original en `data-hc-icon`.
+ *  - `paintIconSpans(root)`: pinta los spans de icono que generan las toolbars
+ *    y el sidebar de Zorzal, que solo aceptan texto en sus items.
  *
  * El modulo no toca el DOM al importarse: se puede cargar desde Node para
- * verificar la tabla sin navegador. `renderIcon` recibe el documento en
- * `options.doc` (o usa `globalThis.document`).
+ * verificar la resolucion de nombres sin navegador. `renderIcon` recibe el
+ * documento en `options.doc` (o usa `globalThis.document`).
  */
 
-import {
-  DEFAULT_ICON,
-  STROKE_WIDTH,
-  VIEW_BOX,
-  getIcon,
-  hasIcon,
-  resolveIcon as resolveZorzalIcon,
-} from '../vendor/zorzal/src/services/icons.js';
+import { STROKE_WIDTH, VIEW_BOX, icons } from '../vendor/zorzal/src/services/icons.js';
 
 /** Namespace de los nodos SVG. */
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 
-/** Grilla del set de Zorzal. */
-export { VIEW_BOX, STROKE_WIDTH, DEFAULT_ICON };
+/** Grilla y grosor del set de Zorzal. */
+export { VIEW_BOX, STROKE_WIDTH };
+
+/** Spans de texto que los widgets de Zorzal usan para el icono. */
+export const ICON_SPAN_SELECTOR = '.z-toolbar__icon, .z-sidebar__icon';
 
 /**
- * Nombres propios de Halcon y su nombre en el set de Zorzal. La tabla es la
- * fuente de verdad del mapeo documentado en `sdk/compat/README.md` y la que
- * muestra el piloto.
- *
- * @type {Readonly<Record<string, string>>}
- */
-export const HALCON_ICON_NAMES = Object.freeze({
-  dashboard: 'dashboard',
-  bars: 'menu',
-  'ellipsis-v': 'ellipsis-v',
-  cog: 'cog',
-  'power-off': 'power-off',
-  ticket: 'ticket',
-  'address-book': 'address-book',
-  'shopping-bag': 'shopping-bag',
-  'shopping-cart': 'shopping-cart',
-  truck: 'truck',
-  flag: 'flag',
-  'chevron-left': 'chevron-left',
-  'chevron-down': 'chevron-down',
-  'chevron-up': 'chevron-up',
-  question: 'question',
-  'cloud-upload': 'cloud-upload',
-  save: 'save',
-  plus: 'plus',
-  minus: 'minus',
-  check: 'check',
-  close: 'close',
-  search: 'search',
-  info: 'info',
-  alert: 'alert',
-  star: 'star',
-  user: 'user',
-  home: 'home',
-  menu: 'menu',
-  trash: 'trash',
-  dot: 'dot',
-});
-
-/**
- * Nombres heredados que no son de Halcon pero llegan por pantallas viejas
- * (nombres con prefijo `fa-` y claves `wxi-` de Webix). Se traducen al icono
- * del set de Zorzal que dice lo mismo; los que no tienen equivalente caen al
- * icono por defecto.
- *
- * @type {Readonly<Record<string, string>>}
- */
-export const LEGACY_ICON_NAMES = Object.freeze({
-  bars: 'menu',
-  'floppy-o': 'save',
-  'floppy-disk': 'save',
-  times: 'close',
-  remove: 'close',
-  'trash-o': 'trash',
-  'angle-down': 'chevron-down',
-  'angle-up': 'chevron-up',
-  'angle-left': 'chevron-left',
-  'arrow-left': 'chevron-left',
-  'arrow-down': 'chevron-down',
-  'arrow-up': 'chevron-up',
-  'menu-down': 'chevron-down',
-  'menu-up': 'chevron-up',
-  'plus-circle': 'plus',
-  'minus-circle': 'minus',
-  ok: 'check',
-  'check-circle': 'check',
-  'search-plus': 'search',
-  cogs: 'cog',
-  'question-circle': 'question',
-  'info-circle': 'info',
-  'exclamation-triangle': 'alert',
-  'exclamation-circle': 'alert',
-  'star-o': 'star',
-  'user-o': 'user',
-  'flag-o': 'flag',
-});
-
-/** @type {Set<string>} nombres ya avisados, para no repetir el warning. */
-const warned = new Set();
-
-/**
- * Normaliza el nombre recibido: recorta, pasa a minusculas y quita los
- * prefijos heredados de las pantallas viejas (el par `fa` + `fa-`, solo `fa-`
- * o `wxi-`).
- *
- * @param {unknown} value
- * @returns {string}
- */
-function normalizeName(value) {
-  if (value === undefined || value === null) return '';
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .replace(/^(?:fa|fas|far|fab)\s+fa-/, '')
-    .replace(/^(?:fa-|wxi-)/, '');
-}
-
-/**
- * Nombre del set de Zorzal que corresponde al nombre de Halcon.
+ * Nombre del set de Zorzal que corresponde al nombre pedido. Un nombre que no
+ * existe resuelve al icono por defecto del set.
  *
  * @param {unknown} name
  * @returns {string}
  */
 export function resolveIconName(name) {
-  const key = normalizeName(name);
-  if (key === '') return DEFAULT_ICON;
-
-  const mapped = HALCON_ICON_NAMES[key] || LEGACY_ICON_NAMES[key];
-  if (mapped !== undefined && hasIcon(mapped)) return resolveZorzalIcon(mapped);
-  if (hasIcon(key)) return resolveZorzalIcon(key);
-
-  if (!warned.has(key)) {
-    warned.add(key);
-    console.warn(`[compat/icons] icono desconocido "${key}": se usa ${DEFAULT_ICON}`);
-  }
-  return DEFAULT_ICON;
+  return icons.resolveIcon(name);
 }
 
 /**
- * Indica si el nombre existe en el set, contando la tabla de Halcon y los
- * nombres heredados.
+ * Indica si el nombre existe en el set (incluidos sus alias).
  *
  * @param {unknown} name
  * @returns {boolean}
  */
 export function hasIconName(name) {
-  const key = normalizeName(name);
-  if (key === '') return false;
-  const mapped = HALCON_ICON_NAMES[key] || LEGACY_ICON_NAMES[key];
-  return hasIcon(mapped !== undefined ? mapped : key);
+  return icons.hasIcon(name);
 }
 
 /**
@@ -196,12 +78,9 @@ function svgNode(doc, name) {
 }
 
 /**
- * Dibuja el icono como `svg` de 24x24 con los paths del servicio de Zorzal.
- * La forma coincide con el widget `icon` de Zorzal: `fill: none`,
- * `stroke: currentColor`, `stroke-width: 2` y extremos redondeados.
- *
- * El `svg` sale con `width`/`height` de 1em como tamano por defecto; la clase
- * `hc-icon` permite ajustarlo desde el CSS (por ejemplo dentro del mainbar).
+ * Dibuja el icono como `svg` de 24x24 con los paths del set de Zorzal. La
+ * forma coincide con el widget `icon` de Zorzal: `fill: none`,
+ * `stroke: currentColor`, `stroke-width` 2 y extremos redondeados.
  *
  * @param {unknown} name
  * @param {{ doc?: Document, document?: Document, className?: string, title?: string, label?: string }} [options]
@@ -235,7 +114,7 @@ export function renderIcon(name, options = {}) {
   }
   if (options.title) svg.setAttribute('title', String(options.title));
 
-  for (const shape of getIcon(resolved)) {
+  for (const shape of icons.getIcon(resolved)) {
     const path = svgNode(doc, 'path');
     path.setAttribute('d', shape.d);
     svg.appendChild(path);
@@ -244,18 +123,17 @@ export function renderIcon(name, options = {}) {
 }
 
 /**
- * Reemplaza el contenido de un nodo por el `svg` del icono. Se usa en el shim
- * para los spans de texto que generan los widgets de Zorzal (toolbar y
- * sidebar). El nombre original queda en `data-hc-icon` del contenedor.
+ * Reemplaza el contenido de un nodo por el `svg` del icono. El nombre original
+ * queda en `data-hc-icon` del contenedor.
  *
  * @param {Element} host
  * @param {unknown} name
- * @param {{ className?: string, title?: string }} [options]
+ * @param {{ className?: string, title?: string, label?: string }} [options]
  * @returns {Element|null} el `svg` creado, o null si no habia icono
  */
 export function paintIcon(host, name, options = {}) {
   if (!host || typeof host.appendChild !== 'function') return null;
-  if (normalizeName(name) === '') return null;
+  if (name === undefined || name === null || String(name).trim() === '') return null;
   const doc = host.ownerDocument || resolveDocument(options);
   if (!doc) return null;
   host.textContent = '';
@@ -265,4 +143,22 @@ export function paintIcon(host, name, options = {}) {
   return svg;
 }
 
-export default { resolveIconName, renderIcon, paintIcon, hasIconName, HALCON_ICON_NAMES, LEGACY_ICON_NAMES };
+/**
+ * Pinta los spans de icono de las toolbars y del sidebar. Los widgets de
+ * Zorzal los generan con el nombre del icono como texto, porque sus items solo
+ * aceptan texto.
+ *
+ * @param {Element|null} root
+ * @param {string} [selector]
+ */
+export function paintIconSpans(root, selector = ICON_SPAN_SELECTOR) {
+  if (!root || typeof root.querySelectorAll !== 'function') return;
+  for (const span of root.querySelectorAll(selector)) {
+    if (span.querySelector('svg')) continue;
+    const name = span.getAttribute('data-hc-icon') || span.textContent.trim();
+    if (name === '') continue;
+    paintIcon(span, name);
+  }
+}
+
+export default { resolveIconName, hasIconName, renderIcon, paintIcon, paintIconSpans };

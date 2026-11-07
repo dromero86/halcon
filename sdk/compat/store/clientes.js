@@ -5,17 +5,23 @@
  * join a `cobradores`). El backend no esta disponible en este repositorio, asi
  * que este modulo guarda las filas con la misma forma que devolveria la query:
  *
- *   { id, apellido, nombre, cliente, addr, doc, tel, fingreso, id_cobrador, cobrador }
+ *   { id, apellido, nombre, cliente, addr, doc, tel, fingreso, saldo, id_cobrador, cobrador }
  *
  * `cliente` y `cobrador` son las columnas calculadas del SQL
  * (`CONCAT(apellido,' ',nombre)` y `CONCAT(CO.apellido,' ',CO.nombre)`).
  * `fingreso` se guarda como texto ISO (`YYYY-MM-DD`), igual que el
  * `DATE_FORMAT(...,'%Y-%m-%d')` del original.
  *
+ * `saldo` es la deuda en pesos: numero, `0` cuando el cliente esta al dia. La
+ * pantalla de inicio calcula con el el saldo total y el porcentaje de clientes
+ * sin deuda.
+ *
  * La vista y el formulario comparten esta unica instancia: el formulario
- * escribe con `save()` y la vista lee con `list()` al montarse. `save()` emite
- * `save` (una vez por alta o modificacion) y `change` (despues de cada
- * escritura); `on()`/`off()` son la via para escuchar sin tocar el store.
+ * escribe con `save()`, la vista lee con `list()` y la accion masiva del
+ * listado borra con `remove()`. `save()` emite `save` (una vez por alta o
+ * modificacion) y `change` (despues de cada escritura); `remove()` emite
+ * `remove` y `change`; `on()`/`off()` son la via para escuchar sin tocar el
+ * store.
  *
  * Lo que falta para el backend real (query SQL, store persistente y sesion)
  * esta documentado en `sdk/compat/README.md`.
@@ -43,6 +49,7 @@ function seed() {
       doc: '30111222',
       tel: '11 5555-1001',
       fingreso: '2021-03-15',
+      saldo: 12500.5,
       id_cobrador: '1',
       cobrador: 'Gomez Ana',
     },
@@ -55,6 +62,7 @@ function seed() {
       doc: '27888999',
       tel: '11 5555-1002',
       fingreso: '2022-07-01',
+      saldo: 0,
       id_cobrador: '2',
       cobrador: 'Lopez Beto',
     },
@@ -67,6 +75,7 @@ function seed() {
       doc: '32444555',
       tel: '11 5555-1003',
       fingreso: '2023-01-20',
+      saldo: 8300,
       id_cobrador: '1',
       cobrador: 'Gomez Ana',
     },
@@ -79,6 +88,7 @@ function seed() {
       doc: '35666777',
       tel: '11 5555-1004',
       fingreso: '2023-11-05',
+      saldo: 0,
       id_cobrador: '3',
       cobrador: 'Diaz Carla',
     },
@@ -91,6 +101,7 @@ function seed() {
       doc: '29888777',
       tel: '11 5555-1005',
       fingreso: '2024-05-12',
+      saldo: 2450.75,
       id_cobrador: '2',
       cobrador: 'Lopez Beto',
     },
@@ -135,6 +146,19 @@ export function nombreCobrador(id) {
 }
 
 /**
+ * Numero seguro: cualquier valor no numerico o negativo queda en 0. El saldo
+ * del cliente es una deuda, asi que nunca es negativo.
+ * @param {unknown} value
+ * @returns {number}
+ */
+export function numero(value) {
+  if (value === undefined || value === null || value === '') return 0;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return 0;
+  return number;
+}
+
+/**
  * Normaliza una fila con la forma de la query. Calcula `cliente` y `cobrador`
  * a partir de los campos editables, para que el formulario no tenga que
  * conocer las columnas derivadas.
@@ -156,6 +180,7 @@ function normalizar(row, id) {
     doc: texto(row.doc),
     tel: texto(row.tel),
     fingreso: texto(row.fingreso) || hoy(),
+    saldo: numero(row.saldo),
     id_cobrador: idCobrador,
     cobrador: nombreCobrador(idCobrador),
   };
@@ -182,7 +207,7 @@ function emit(type, payload) {
  * Suscribe un listener a un evento del store. Devuelve la funcion para
  * desuscribirlo.
  *
- * @param {'save'|'change'} type
+ * @param {'save'|'remove'|'change'} type
  * @param {(payload: unknown) => void} listener
  * @returns {() => void}
  */
@@ -263,6 +288,29 @@ export function save(row) {
 }
 
 /**
+ * Baja de una o varias filas por id. Es una baja fisica en memoria: la baja
+ * logica (marcar `activo = 0`) corresponde al backend. Emite `remove` con los
+ * ids efectivamente quitados y `change` con la lista resultante.
+ *
+ * @param {unknown|unknown[]} ids id suelto o arreglo de ids
+ * @returns {number} cantidad de filas quitadas
+ */
+export function remove(ids) {
+  const pedidos = Array.isArray(ids) ? ids : [ids];
+  const claves = new Set(pedidos.map((id) => texto(id)).filter((clave) => clave !== ''));
+  if (claves.size === 0) return 0;
+
+  const antes = filas.length;
+  filas = filas.filter((fila) => !claves.has(String(fila.id)));
+  const quitadas = antes - filas.length;
+  if (quitadas === 0) return 0;
+
+  emit('remove', { ids: [...claves], quitadas });
+  emit('change', list());
+  return quitadas;
+}
+
+/**
  * Vuelve a las cinco filas de ejemplo. Pensado para pruebas y para remontar
  * el piloto desde cero.
  */
@@ -272,4 +320,4 @@ export function reset() {
   emit('change', list());
 }
 
-export default { COBRADORES, list, getById, save, reset, on, off, cobradorOptions, nombreCobrador };
+export default { COBRADORES, list, getById, save, remove, reset, on, off, cobradorOptions, nombreCobrador, numero };

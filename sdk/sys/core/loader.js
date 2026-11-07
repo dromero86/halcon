@@ -194,7 +194,7 @@
                     if(item == undefined) that.finalize();
                     that.log("sys.core.loader",  "stairs ("+that.source.length+") " + that.getModule(item.url) );
  
-                    that.load(item.tag,  item.url, item.cache!= undefined ? item.cache : true ,  that.source.length == 0 ? that.finalize :  fn);    
+                    that.load(item.tag,  item.url, item.cache!= undefined ? item.cache : true ,  that.source.length == 0 ? that.finalize :  fn, item.module == true);    
                 };
                 fn(); 
             };
@@ -210,9 +210,10 @@
 
             return runnable;
         },
-        load : function( tag, url, cache, callback)
+        load : function( tag, url, cache, callback, as_module)
         {  
             var that = this;
+            var es_modulo = ( tag == "script" && as_module == true );
             that.loaded++;  
             that.stack.push(url);
             that.current = url;
@@ -222,13 +223,13 @@
                 case "template"  : 
 
                     that.ajax_native(that.project_url() + url + ( cache != true  ? ( url.indexOf("?")>-1 ? "&": "?" ) + "refresh="+hash():"" ), function(responseText){
- 
+
                         var modulo = app.getModule(url);
 
                         __.templates[modulo]=responseText;
 
                         callback();
-                    }); 
+                    }, callback); 
 
                 break;
 
@@ -241,7 +242,7 @@
                             usr[i]= json[i];
                         }
                         callback();
-                    });
+                    }, callback);
                 break;
                 case "icon":
                     var e = document.createElement("link");
@@ -263,15 +264,19 @@
                 default: 
                     var e = document.createElement(tag)
 
-                    if( tag == "script" ) that.setDomAttribute(e, "module", that.getModule(url)); 
+                    // Un item con "module": true se carga como modulo ESM: el
+                    // atributo "module" que usa el loader para ubicar el
+                    // archivo no aplica y el tipo pasa a ser "module".
+                    if( tag == "script" && es_modulo != true ) that.setDomAttribute(e, "module", that.getModule(url)); 
                     that.setDomAttribute(e, "load", "false"); 
                     that.setDomAttribute(e, "charset", "UTF-8"); 
-                    if( tag == "script" ) e.type = "text/javascript";
+                    if( tag == "script" ) e.type = es_modulo == true ? "module" : "text/javascript";
                     if( tag == "link"   ) e.type = "text/css"; 
                     e.onerror = function()
                     {  
                         that.log("sys.core.loader", "load error: " + url);
                         that.fails.push(url);  
+                        console.warn("[sys/core/loader] no se pudo cargar " + url + ": se omite y se sigue con el resto del manifiesto");
                         e.setAttribute("load", "false"); 
                         that.bootcallback(e, callback)();  
                     }; 
@@ -304,9 +309,11 @@
             }
  
         },  
-        ajax_native : function(url, callback)
+        ajax_native : function(url, callback, onerror)
         {
-            var that =  this;
+            var that  =  this;
+            var fallo = ( typeof onerror == "function" ? onerror : function(){} );
+            var avisado = false;
             var xmlhttp = new XMLHttpRequest(); 
             xmlhttp.onreadystatechange = function()
             {
@@ -330,6 +337,15 @@
                     else
                     {
                         that.log("sys.core.loader", "ajax request error ( status " +xmlhttp.readyState+" / code "+xmlhttp.status+") " + url);
+
+                        // Un recurso del manifiesto que no existe no corta la
+                        // carga: se avisa por consola y se sigue con el resto.
+                        if( xmlhttp.readyState == 4 && avisado == false )
+                        {
+                            avisado = true;
+                            console.warn("[sys/core/loader] no se pudo leer " + url + " (status " + xmlhttp.status + "): se omite y se sigue con el resto del manifiesto");
+                            fallo();
+                        }
                     }
                 }
             }
