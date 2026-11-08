@@ -19,19 +19,19 @@
     "mock": "node mock/server.mjs",
     "test": "node --test test/",
     "lint": "node scripts/lint.mjs",
+    "es2026": "node scripts/es2026.mjs",
     "compat": "node scripts/compat.mjs",
     "build": "node scripts/build.mjs",
-    "check": "npm run lint && npm run compat && npm test"
+    "check": "npm run lint && npm run es2026 && npm run compat && npm test"
   },
   "browserslist": [
-    "last 2 Chrome versions",
-    "last 2 Edge versions",
-    "last 2 Firefox versions",
-    "last 2 Safari versions",
-    "not ie <= 11"
+    "Chrome >= 147",
+    "Edge >= 147",
+    "Firefox >= 147",
+    "Safari >= 26.4"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=26"
   },
   "license": "MIT"
 }

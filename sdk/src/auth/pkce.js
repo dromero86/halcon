@@ -6,6 +6,10 @@
  * disponibles en el navegador y en Node desde la version 20. Se puede importar
  * en un test de Node sin tocar globales del documento.
  *
+ * El challenge se codifica con `Uint8Array.prototype.toBase64`, ES2026, que es
+ * el baseline que declara el paquete: no hay bucle manual de base64 ni
+ * `btoa`/`Buffer`.
+ *
  * Alfabeto del verificador: base64url sin relleno (`A-Z`, `a-z`, `0-9`, `-`,
  * `_`), que es un subconjunto de los caracteres no reservados que exige PKCE.
  * 64 caracteres queda dentro del rango 43..128 del RFC.
@@ -31,27 +35,6 @@ function azar() {
     throw new Error('pkce: falta crypto.getRandomValues en este entorno');
   }
   return fuente;
-}
-
-/**
- * Codifica bytes como base64url sin relleno, sin `btoa` ni `Buffer`.
- * @param {Uint8Array} bytes
- * @returns {string}
- */
-function base64url(bytes) {
-  let salida = '';
-  for (let i = 0; i < bytes.length; i += 3) {
-    const b0 = bytes[i];
-    const hay1 = i + 1 < bytes.length;
-    const hay2 = i + 2 < bytes.length;
-    const b1 = hay1 ? bytes[i + 1] : 0;
-    const b2 = hay2 ? bytes[i + 2] : 0;
-    salida += ALFABETO[b0 >> 2];
-    salida += ALFABETO[((b0 & 0x03) << 4) | (b1 >> 4)];
-    if (hay1) salida += ALFABETO[((b1 & 0x0f) << 2) | (b2 >> 6)];
-    if (hay2) salida += ALFABETO[b2 & 0x3f];
-  }
-  return salida;
 }
 
 /**
@@ -97,5 +80,5 @@ export async function challengeS256(verifier) {
   }
   const bytes = new TextEncoder().encode(verifier);
   const resumen = await azar().subtle.digest('SHA-256', bytes);
-  return base64url(new Uint8Array(resumen));
+  return new Uint8Array(resumen).toBase64({ alphabet: 'base64url', omitPadding: true });
 }
