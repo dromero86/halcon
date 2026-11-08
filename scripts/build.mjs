@@ -309,7 +309,7 @@ import { init } from './dist/halcon.js';
     vendor/zorzal/      motor Zorzal vendorizado
     compat/             shims de sesion y navegacion que los plugins todavia usan
 
-Los estilos del motor estan en \`vendor/zorzal/src/zorzal.css\`.
+Los estilos del motor estan en \`vendor/zorzal/zorzal-0.1.0.min.css\`.
 
 ## Alcance
 

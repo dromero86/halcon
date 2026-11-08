@@ -22,7 +22,7 @@
  * el aviso de error sale por el servicio `toast`.
  */
 
-import { create, define, toast } from '../../vendor/zorzal/src/zorzal.js';
+import { create, define, toast } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { __ } from '../../compat/globals.js';
 
 /**

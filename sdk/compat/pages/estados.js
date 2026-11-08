@@ -27,7 +27,7 @@
  * contenedor.
  */
 
-import { create } from '../../vendor/zorzal/src/zorzal.js';
+import { create } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { renderIcon } from '../icons.js';
 import { mount as mountInicio, PAGE_ID as INICIO_ID } from './inicio.js';
 

@@ -22,7 +22,7 @@
  * nativo y no se emulan; `footer` no se traslada.
  */
 
-import { create, define } from '../../vendor/zorzal/src/zorzal.js';
+import { create, define } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { __ } from '../../compat/globals.js';
 
 /**

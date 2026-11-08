@@ -11,7 +11,7 @@ PID_FILE := $(RUN_DIR)/serve.pid
 LOG_FILE := $(RUN_DIR)/serve.log
 
 ENTRY  := /
-ASSETS := sdk/vendor/zorzal/src/zorzal.css sdk/compat/theme.css sdk/compat/pages/inicio.js sdk/compat/pages/estados.js
+ASSETS := sdk/vendor/zorzal/zorzal-0.1.0.min.css sdk/compat/theme.css sdk/compat/pages/inicio.js sdk/compat/pages/estados.js
 
 .DEFAULT_GOAL := help
 

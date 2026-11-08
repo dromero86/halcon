@@ -11,3 +11,4 @@ import './auth.test.js';
 import './loader.test.js';
 import './app-pages.test.js';
 import './es2026.test.js';
+import './vendor.test.js';

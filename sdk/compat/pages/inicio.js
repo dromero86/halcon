@@ -24,7 +24,7 @@
  * El modulo registra la pantalla como `app.inicio` al importarse.
  */
 
-import { create } from '../../vendor/zorzal/src/zorzal.js';
+import { create } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import * as store from '../store/clientes.js';
 import { renderIcon } from '../icons.js';
 

@@ -43,7 +43,7 @@
  * El modulo registra la pantalla como `app.abm.clientes_view` al importarse.
  */
 
-import { create } from '../../vendor/zorzal/src/zorzal.js';
+import { create } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { mount as mountForm } from './clientes_form.js';
 import { getSession } from '../session-shim.js';
 import * as store from '../store/clientes.js';

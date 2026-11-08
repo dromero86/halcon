@@ -3,7 +3,7 @@
  *
  * No hay fuente de iconos ni tabla de equivalencias con Font Awesome: el
  * nombre se resuelve contra el set de Zorzal
- * (`sdk/vendor/zorzal/src/services/icons.js`), que dibuja trazos SVG sobre una
+ * (`sdk/vendor/zorzal/zorzal-0.1.0.min.js`), que dibuja trazos SVG sobre una
  * grilla de 24x24 con `stroke: currentColor`. Los alias del set (`bars` ->
  * `menu`) y el icono por defecto (`dot`) son los de Zorzal.
  *
@@ -21,7 +21,10 @@
  * documento en `options.doc` (o usa `globalThis.document`).
  */
 
-import { STROKE_WIDTH, VIEW_BOX, icons } from '../vendor/zorzal/src/services/icons.js';
+import { icons } from '../vendor/zorzal/zorzal-0.1.0.min.js';
+
+/** Grilla y grosor del set, publicados por el namespace `icons`. */
+const { STROKE_WIDTH, VIEW_BOX } = icons;
 
 /** Namespace de los nodos SVG. */
 export const SVG_NS = 'http://www.w3.org/2000/svg';

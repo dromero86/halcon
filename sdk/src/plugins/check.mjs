@@ -50,7 +50,7 @@
  * Uso: node sdk/src/plugins/check.mjs
  */
 
-import { isDefined, setDocument } from '../../vendor/zorzal/src/zorzal.js';
+import { isDefined, setDocument } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import './mainbar.js';
 import './formview.js';
 import './datalist.js';

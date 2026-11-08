@@ -45,7 +45,7 @@
  * `mount(root, { menu })` permite pasar otro menu sin tocar el global.
  */
 
-import { create } from '../../vendor/zorzal/src/zorzal.js';
+import { create } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { usr } from '../globals.js';
 import { initTheme, setSidebarToggle } from '../../src/plugins/mainbar.js';
 import { paintIconSpans, renderIcon } from '../icons.js';

@@ -24,7 +24,7 @@
         {
             "id": "zorzal",
             "type": "css",
-            "url": "vendor/zorzal/src/zorzal.css",
+            "url": "vendor/zorzal/zorzal-0.1.0.min.css",
             "cache": "immutable"
         },
         {

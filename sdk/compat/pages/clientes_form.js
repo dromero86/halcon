@@ -41,7 +41,7 @@
  * descartan cambios.
  */
 
-import { create } from '../../vendor/zorzal/src/zorzal.js';
+import { create } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { mount as mountView } from './clientes_view.js';
 import * as store from '../store/clientes.js';
 import { ORDEN, REGLAS, validar } from '../../src/rules/clientes.js';

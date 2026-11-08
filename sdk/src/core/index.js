@@ -16,7 +16,7 @@
  *   init({ el: '#app', spec: { kind: 'label', text: 'Hola' } });
  */
 
-import { ui, create, define, kinds, icons } from '../../vendor/zorzal/src/zorzal.js';
+import { ui, create, define, kinds, icons } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 
 export { ui, create, define, kinds, icons };
 export { VERSION } from '../version.js';
@@ -48,7 +48,7 @@ export function register(kind, factory) {
  *  - `{ el, kind, ...props }`: se arma el spec con `kind` y el resto de props.
  *
  * @param {{ el: Element|string, spec?: object, kind?: string } & Record<string, unknown>} config
- * @returns {import('../../vendor/zorzal/src/core/widget.js').Widget} instancia montada
+ * @returns {import('../../vendor/zorzal/zorzal-0.1.0.min.js').Widget} instancia montada
  * @throws {Error} si falta `el`, o si no hay `spec` ni `kind`
  */
 export function init(config) {

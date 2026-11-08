@@ -34,10 +34,9 @@
  * ancho real.
  */
 
-import { create, define } from '../../vendor/zorzal/src/zorzal.js';
+import { create, define, icons } from '../../vendor/zorzal/zorzal-0.1.0.min.js';
 import { usr, __ } from '../../compat/globals.js';
 import { paintIcon, paintIconSpans } from '../../compat/icons.js';
-import { icons } from '../../vendor/zorzal/src/services/icons.js';
 
 /** Id del logo. */
 export const LOGO_ID = '_mb_logo';
