@@ -15,7 +15,7 @@ ASSETS := sdk/vendor/zorzal/src/zorzal.css sdk/compat/theme.css sdk/compat/pages
 
 .DEFAULT_GOAL := help
 
-.PHONY: help serve legacy mock demo start stop restart status logs check urls doctor clean
+.PHONY: help serve mock demo start stop restart status logs check urls doctor clean
 
 help: ## Muestra esta ayuda
 	@echo "Halcón · servidor de desarrollo"
@@ -29,11 +29,6 @@ help: ## Muestra esta ayuda
 serve: ## Sirve el repo en primer plano (Ctrl+C para cortar)
 	@echo "Halcon en http://$(BIND):$(PORT)/ - Ctrl+C para cortar"
 	@exec $(PYTHON) -u $(ROOT)/scripts/serve.py $(PORT) --bind $(BIND)
-
-legacy: ## Sirve el arranque heredado de Webix (source-legacy.json) en primer plano
-	@echo "Halcón heredado en http://$(BIND):$(PORT)/ · Ctrl+C para cortar"
-	@echo "Manifiesto: sdk/config/source-legacy.json"
-	@exec $(PYTHON) -u $(ROOT)/scripts/serve.py $(PORT) --bind $(BIND) --legacy
 
 mock: ## Levanta el emulador de la API en primer plano (Ctrl+C para cortar)
 	@echo "Emulador Halcón en http://127.0.0.1:$(MOCK_PORT)/ · Ctrl+C para cortar"

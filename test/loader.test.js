@@ -4,7 +4,7 @@
  * El loader corre en el navegador, asi que la suite lo ejecuta en un contexto
  * `node:vm` con un DOM falso minimo: elementos, head/body, XHR e Image. No hay
  * dependencias ni navegador real; se verifica el contrato (manifiestos v1 y v2,
- * cache, viewport, orden de carga y app.define / app.require).
+ * cache, viewport, orden de carga y modulos ES).
  */
 
 import test from 'node:test';
@@ -131,9 +131,6 @@ function createHarness(options = {}) {
       const url = el.src || el.href || '';
       if (!url) return;
       loads.push({ tag: el.tagName.toLowerCase(), url, type: el.type || '' });
-      if (el.tagName === 'SCRIPT' && /\/app\/demo\.js$/.test(url.split('?')[0])) {
-        sandbox.app.define('app.demo', () => ({ demo: true }));
-      }
       const key = url;
       const outcome = responses[key] === 'fail' ? 'fail' : 'ok';
       setTimeout(() => {
@@ -394,63 +391,6 @@ test('parallel con deps: respeta dependencias y no duplica recursos', async () =
   assert.equal(result.ok, true);
   const urls = harness.loads.map((item) => item.url);
   assert.deepEqual(urls, [`${PROJECT}a.css`, `${PROJECT}b.css`, `${PROJECT}c.js`]);
-});
-
-test('app.define / app.require: sincrono, memoizado por llamada y con callback async', async () => {
-  const harness = createHarness({
-    manifest: { version: '2', resources: [] },
-  });
-  await boot(harness);
-
-  const app = harness.sandbox.app;
-  app.define('demo.uno', () => ({ n: 1 }));
-
-  assert.equal(app.isDefined('demo.uno'), true);
-  assert.deepEqual(app.require('demo.uno'), { n: 1 });
-  assert.deepEqual(harness.sandbox.__loader.modulos['demo.uno'](), { n: 1 });
-
-  const value = await new Promise((resolve) => app.require('demo.uno', resolve));
-  assert.deepEqual(value, { n: 1 });
-
-  const imported = await app.import('demo.uno');
-  assert.deepEqual(imported, { n: 1 });
-
-  assert.throws(() => app.define('', () => ({})), /string no vacio/);
-  assert.throws(() => app.define('x', null), /funcion de definicion/);
-});
-
-test('app.require dinámico: un solo script en vuelo y reintento sin red', async () => {
-  const harness = createHarness({
-    manifest: { version: '2', resources: [] },
-  });
-  await boot(harness);
-
-  const app = harness.sandbox.app;
-  const cargas = [];
-  const uno = new Promise((resolve) => app.require('app.demo', (value) => {
-    cargas.push(value);
-    resolve(value);
-  }));
-  const dos = new Promise((resolve) => app.require('app.demo', (value) => {
-    cargas.push(value);
-    resolve(value);
-  }));
-
-  await withTimeout(Promise.all([uno, dos]));
-  assert.equal(cargas.length, 2);
-  assert.deepEqual(cargas[0], { demo: true });
-  assert.equal(
-    harness.loads.filter((item) => item.url.split('?')[0].endsWith('/app/demo.js')).length,
-    1,
-  );
-
-  // Ya definido: no se vuelve a pedir por red.
-  const tres = await new Promise((resolve) => app.require('app.demo', resolve));
-  assert.deepEqual(tres, { demo: true });
-  assert.equal(
-    harness.loads.filter((item) => item.url.split('?')[0].endsWith('/app/demo.js')).length,
-    1,
-  );
 });
 
 test('carga dinamica en runtime: loadStyle / loadScript / unload', async () => {

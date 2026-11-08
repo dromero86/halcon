@@ -4,7 +4,9 @@
  * Origen: `sdk/app/dashboard.js` (SDK heredado + `sdk/sys/plugins/sidebar.js`). El
  * original montaba un layout vertical con el `mainbar` arriba y, abajo, el
  * sidebar a la izquierda y el area de contenido a la derecha; al hacer clic en
- * un item llamaba a `app.require(id)` y mantenia un popup "Submenu".
+ * un item resolvia la pantalla por id con el registro de modulos heredado y
+ * mantenia un popup "Submenu". Este modulo resuelve la pantalla con el callback
+ * `navigate` que recibe en las opciones y mantiene el popup "Submenu".
  *
  * Este modulo arma el mismo shell con los widgets de Zorzal y guarda la
  * referencia de cada uno:
@@ -13,8 +15,8 @@
  *    anidados con `id`, `text` e `icon`, marca el activo y emite `select`;
  *  - el popup de submenu es el widget `popup` con una `unitlist` adentro, con
  *    los hijos del item con hijos que se selecciono;
- *  - el area de contenido muestra el nombre del item y llama a `app.require(id)`
- *    para montar la pantalla registrada.
+ *  - el area de contenido muestra el nombre del item y llama al callback
+ *    `navigate(id)` para montar la pantalla.
  *
  * No hay busqueda por id global: `mount` devuelve el controlador con las
  * instancias (`sidebar`, `mainbar`, `title`, `body`, `popup`, `layout`) y el
@@ -46,10 +48,12 @@
  */
 
 import { create } from '../../vendor/zorzal/src/zorzal.js';
-import { app } from '../app-shim.js';
 import { usr } from '../globals.js';
 import { initTheme, setSidebarToggle } from '../../src/plugins/mainbar.js';
 import { paintIconSpans, renderIcon } from '../icons.js';
+
+/** Id de la pantalla del shell. */
+export const PAGE_ID = 'app.dashboard';
 
 /** Id del sidebar. */
 const SIDEBAR_ID = '_sidebar';
@@ -170,25 +174,12 @@ function resolveRoot(root) {
 }
 
 /**
- * Descripcion corta del valor que devolvio una definicion.
- * @param {unknown} value
- * @returns {string}
- */
-function describe(value) {
-  if (value === null) return 'null';
-  if (value === undefined) return 'undefined';
-  if (typeof value === 'function') return 'una funcion';
-  if (typeof value === 'object') return 'un objeto';
-  if (typeof value === 'string') return `"${value}"`;
-  return String(value);
-}
-
-/**
  * Monta el dashboard dentro de `root`.
  *
  * @param {Element|string} root contenedor (elemento o selector)
  * @param {{
  *   menu?: unknown,
+ *   navigate?: (id: unknown) => ({ mount: (host: unknown) => unknown } | null),
  *   onChange?: (node: any) => void,
  *   user?: string,
  *   session?: any,
@@ -533,8 +524,7 @@ export function mount(root, options = {}) {
 
   /**
    * Pinta el nombre y el detalle del item en el area de contenido. Si el id
-   * tiene definicion en `app`, la resuelve y monta la pantalla cuando la
-   * definicion expone `mount`.
+   * resuelve a una pantalla con el callback `navigate`, la monta.
    * @param {any} node
    */
   function paintContent(node) {
@@ -546,23 +536,20 @@ export function mount(root, options = {}) {
       lines.push(`Seccion con ${node.children.length} items. El submenu se abre al costado.`);
     }
 
-    if (!app.isDefined(node.id)) {
-      lines.push('Sin pantalla registrada para este id.');
+    body.set({ value: lines.join('\n') });
+    if (typeof options.navigate !== 'function') return;
+
+    const page = options.navigate(node.id);
+    if (!page || typeof page.mount !== 'function') {
+      lines.push('Sin pantalla para este id.');
       body.set({ value: lines.join('\n') });
       return;
     }
 
-    body.set({ value: lines.join('\n') });
     try {
-      const page = app.require(node.id);
-      if (page && typeof page.mount === 'function') {
-        lastPage = page.mount(body.content);
-      } else {
-        lines.push(`app.require devolvio ${describe(page)}.`);
-        body.set({ value: lines.join('\n') });
-      }
+      lastPage = page.mount(body.content);
     } catch (error) {
-      lines.push(`app.require fallo: ${error && error.message ? error.message : String(error)}`);
+      lines.push(`la pantalla fallo al montar: ${error && error.message ? error.message : String(error)}`);
       body.set({ value: lines.join('\n') });
     }
   }
@@ -648,11 +635,5 @@ export function mount(root, options = {}) {
     destroy,
   };
 }
-
-/**
- * Definicion de la pantalla en el registro de `app`. La factory no toca el
- * DOM: montar sigue siendo responsabilidad de quien llama a `mount`.
- */
-app.define('app.dashboard', () => ({ mount }));
 
 export default { mount };

@@ -4,11 +4,10 @@
  * Es la misma secuencia que arma el piloto del dashboard, extraida a un modulo
  * para que el arranque de `sdk/index.html` no repita logica:
  *
- *  1. instala el shim de `app` (`compat/app-shim.js`) como `globalThis.app`;
- *  2. instala el shim de sesion (`compat/session-shim.js`) como `usr` y `__`;
- *  3. registra las pantallas importando `sdk/src/app/index.js` (`app.login`,
+ *  1. instala el shim de sesion (`compat/session-shim.js`) como `usr` y `__`;
+ *  2. importa las pantallas de `sdk/src/app/index.js` (`app.login`,
  *     `app.inicio`, estados y el ABM de clientes);
- *  4. observa la sesion del piloto y monta `app.login` mientras es anonima, o
+ *  3. observa la sesion del piloto y monta `app.login` mientras es anonima, o
  *     el shell del dashboard cuando esta autenticada.
  *
  * No crea sesiones ni guarda tokens: la sesion sale de `sesionDelPiloto()`, que
@@ -22,12 +21,11 @@
  * `start()` es idempotente: la segunda llamada devuelve el mismo controlador.
  */
 
-import { app, install } from '../compat/app-shim.js';
 import { usr, installSession, applySessionUser } from '../compat/session-shim.js';
 import { mount as montarDashboard } from '../compat/pages/dashboard.js';
-import { sesionDelPiloto } from '../compat/pages/login.js';
+import { mount as montarLoginPage, sesionDelPiloto } from '../compat/pages/login.js';
 import { EVENTO_SESION_VENCIDA, reiniciarCarga } from '../compat/pages/clientes_view.js';
-import '../src/app/index.js';
+import { findPage } from '../src/app/index.js';
 
 /** Id del contenedor de la aplicacion. */
 export const ROOT_ID = 'app';
@@ -109,7 +107,6 @@ export function start(options = {}) {
   if (control) return control;
 
   const doc = options.document || document;
-  install(globalThis);
   installSession(globalThis);
 
   const raiz = resolverRaiz(options.root, doc);
@@ -132,7 +129,7 @@ export function start(options = {}) {
     vaciar();
     vista = 'login';
     dashboard = null;
-    return app.require('app.login').mount(raiz, { session: sesion, aviso: avisoLogin });
+    return montarLoginPage(raiz, { session: sesion, aviso: avisoLogin });
   }
 
   /**
@@ -143,7 +140,7 @@ export function start(options = {}) {
     const usuario = estado && typeof estado.user === 'string' ? estado.user : '';
     vaciar();
     vista = 'shell';
-    dashboard = montarDashboard(raiz, { menu, session: sesion, user: usuario });
+    dashboard = montarDashboard(raiz, { menu, navigate: findPage, session: sesion, user: usuario });
     if (dashboard) dashboard.select(ITEM_INICIO.id);
     return dashboard;
   }

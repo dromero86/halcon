@@ -44,7 +44,7 @@
  */
 
 import { create } from '../../vendor/zorzal/src/zorzal.js';
-import { app } from '../app-shim.js';
+import { mount as mountForm } from './clientes_form.js';
 import { getSession } from '../session-shim.js';
 import * as store from '../store/clientes.js';
 import {
@@ -209,9 +209,8 @@ export function mount(host, options = {}) {
     const id = row && row.id !== undefined ? row.id : null;
     if (typeof options.onOpenForm === 'function') return options.onOpenForm(row || null);
 
-    const page = app.require('app.abm.clientes_form');
     vaciar(target);
-    return page.mount(target, {
+    return mountForm(target, {
       id,
       onSaved: () => {
         vaciar(target);
@@ -645,10 +644,5 @@ export function mount(host, options = {}) {
     },
   };
 }
-
-/**
- * Definicion en el registro de `app`. La factory no toca el DOM.
- */
-app.define(PAGE_ID, () => ({ mount }));
 
 export default { mount, COLUMNS };

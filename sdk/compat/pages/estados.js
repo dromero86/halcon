@@ -12,7 +12,7 @@
  * Cada una queda registrada en el shim de `app` con la misma forma que el
  * resto de las pantallas (`{ mount }`), asi que se pueden montar por separado
  * desde cualquier ruta y tambien desde el dashboard como cualquier otra
- * definicion.
+ * pantalla.
  *
  * Todas comparten la misma estructura: icono del set de Zorzal, titulo,
  * mensaje y la accion `Volver al inicio`, que remonta `app.inicio`.
@@ -20,7 +20,7 @@
  * Uso:
  *
  *   import { mount } from './pages/estados.js';
- *   app.require('app.estado.404').mount(document.querySelector('#contenido'));
+ *   mount(document.querySelector('#contenido'), '404');
  *
  * `mount(host, { onHome })` permite que quien navega se haga cargo del
  * regreso al inicio; sin `onHome` la pagina remonta `app.inicio` en el mismo
@@ -28,7 +28,6 @@
  */
 
 import { create } from '../../vendor/zorzal/src/zorzal.js';
-import { app } from '../app-shim.js';
 import { renderIcon } from '../icons.js';
 import { mount as mountInicio, PAGE_ID as INICIO_ID } from './inicio.js';
 
@@ -219,14 +218,23 @@ export function mount(host, codigo = '404', options = {}) {
 }
 
 /**
- * Registra en `app` las cuatro pantallas. Cada definicion monta su estado y
- * acepta `{ onHome }` como opcion.
+ * Busca un estado por su id de pantalla.
+ * @param {unknown} id
+ * @returns {(typeof ESTADOS)[number] | null}
  */
-for (const estado of ESTADOS) {
-  app.define(estado.id, () => ({
-    estado,
-    mount: (host, options) => montar(host, estado, options || {}),
-  }));
+export function estadoPorId(id) {
+  return ESTADOS.find((estado) => estado.id === id) || null;
+}
+
+/**
+ * Envuelve un estado con la misma forma que devolvia el registro de `app`.
+ * @param {unknown} id
+ * @returns {{ estado: (typeof ESTADOS)[number], mount: (host: unknown, options?: Record<string, unknown>) => unknown } | null}
+ */
+export function paginaEstado(id) {
+  const estado = estadoPorId(id);
+  if (!estado) return null;
+  return { estado, mount: (host, options) => montar(host, estado, options || {}) };
 }
 
 export default { ESTADOS, mount, estadoPorCodigo };

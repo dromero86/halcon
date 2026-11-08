@@ -1,11 +1,9 @@
 /**
  * Stubs de los globales que usan los plugins heredados de Halcon.
  *
- * Los plugins originales (`sdk/sys/plugins/*.js`) se cargan dentro de la
- * aplicacion y esperan tres globales: `usr` (sesion del usuario), `__` (utilidades
- * de la app) y `app` (navegacion). Al portarlos a modulos ES sobre el shim de
- * Zorzal no hay aplicacion detras, asi que este modulo publica la superficie
- * minima que los plugins tocan.
+ * Los plugins portados a modulos ES esperan dos globales: `usr` (sesion del
+ * usuario) y `__` (utilidades de la app). No hay aplicacion detras, asi que este
+ * modulo publica la superficie minima que los plugins tocan.
  *
  * Reglas de este modulo:
  *  - no hay logica de negocio: nada de red, nada de estado de la app;
@@ -13,10 +11,10 @@
  *    `[compat/globals]` y sigue;
  *  - los valores son de ejemplo y estan marcados como tales.
  *
- * `installGlobals(target)` copia los tres objetos al objeto indicado
+ * `installGlobals(target)` copia los dos objetos al objeto indicado
  * (`globalThis` por omision) y lo usa el piloto, para que el codigo que aun
- * dependa de `window.usr`, `window.__` o `window.app` no falle. Los plugins
- * portados importan los objetos, no leen los globales.
+ * dependa de `window.usr` o `window.__` no falle. Los plugins portados
+ * importan los objetos, no leen los globales.
  */
 
 /** Prefijo unico de los avisos de los stubs. */
@@ -110,20 +108,6 @@ export const __ = {
 };
 
 /**
- * Navegacion de la aplicacion. Sin rutas no hay a donde ir: solo avisa.
- */
-export const app = {
-  /**
-   * @param {unknown} target
-   * @returns {false}
-   */
-  require(target) {
-    console.warn(`${WARN} app.require(${JSON.stringify(target)}): sin navegacion en el piloto`);
-    return false;
-  },
-};
-
-/**
  * Publica los stubs como globales, para el codigo que no los importa.
  * @param {Record<string, unknown>} [target]
  * @returns {Record<string, unknown>} el objeto intervenido
@@ -132,8 +116,7 @@ export function installGlobals(target = typeof globalThis === 'undefined' ? {} :
   if (!target || (typeof target !== 'object' && typeof target !== 'function')) return target;
   target.usr = usr;
   target.__ = __;
-  target.app = app;
   return target;
 }
 
-export default { usr, __, app, installGlobals };
+export default { usr, __, installGlobals };

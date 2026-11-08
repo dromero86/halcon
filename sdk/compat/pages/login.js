@@ -31,7 +31,6 @@
  * El modulo registra la pantalla como `app.login` al importarse.
  */
 
-import { app } from '../app-shim.js';
 import { applySessionUser, getSession, resolveApiBase, setSession } from '../session-shim.js';
 import { createSession } from '../../src/auth/session.js';
 
@@ -310,10 +309,5 @@ export function mount(host, options = {}) {
     },
   };
 }
-
-/**
- * Definicion en el registro de `app`. La factory no toca el DOM.
- */
-app.define(PAGE_ID, () => ({ mount, crearSesion, sesionDelPiloto }));
 
 export default { mount, crearSesion, sesionDelPiloto };

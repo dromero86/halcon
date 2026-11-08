@@ -24,7 +24,7 @@
  */
 
 import { create, define, toast } from '../../vendor/zorzal/src/zorzal.js';
-import { __, app } from '../../compat/globals.js';
+import { __ } from '../../compat/globals.js';
 
 /**
  * Habilita o deshabilita un widget por su prop `disabled`.
@@ -46,12 +46,12 @@ define('formview', (ctx) => {
 
   /**
    * Vuelve a la pantalla de datos: el callback de la prop `back` o
-   * `app.require(dataview)`, igual que el original.
+   * `props.openDataview`, igual que el original.
    */
   const back = () => {
     if (typeof props.back === 'function') return props.back();
-    if (props.dataview && app.isDefined(props.dataview)) app.require(props.dataview);
-    else console.warn(`[formview] la pantalla "${props.dataview}" no esta registrada`);
+    if (typeof props.openDataview === 'function') return props.openDataview();
+    console.warn(`[formview] sin props.openDataview: no se vuelve a "${props.dataview}"`);
     return false;
   };
 

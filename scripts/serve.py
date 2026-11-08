@@ -8,7 +8,7 @@ cual, deja `src="{url}sdk/sys/core/loader.js"` y el loader nunca arranca.
 Este servidor hace ese reemplazo al vuelo y despues sirve los estaticos desde
 la raiz del repositorio, sin dependencias.
 
-Uso: python3 scripts/serve.py [puerto] [--bind 0.0.0.0] [--legacy]
+Uso: python3 scripts/serve.py [puerto] [--bind 0.0.0.0]
 """
 
 import argparse
@@ -18,23 +18,17 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(RAIZ, "sdk", "index.html")
-LEGACY = "config/source-legacy.json"
 
-
-def leer_index(legacy):
+def leer_index():
     """Devuelve el index con `{url}` resuelto y `{rand}` pendiente."""
     with open(INDEX, encoding="utf-8") as archivo:
         html = archivo.read()
-    if legacy:
-        html = html.replace("config/source.json", LEGACY).replace("{url}", "")
-    else:
-        html = html.replace("{url}", "/")
-    return html
+    return html.replace("{url}", "/")
 
 
-def hacer_handler(legacy):
+def hacer_handler():
     """Arma el handler HTTP que sirve el index y los estaticos del repo."""
-    html = leer_index(legacy)
+    html = leer_index()
 
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
@@ -81,14 +75,9 @@ def main():
         default=int(os.environ.get("PORT", "8090")),
     )
     parser.add_argument("--bind", default=os.environ.get("BIND", "0.0.0.0"))
-    parser.add_argument(
-        "--legacy",
-        action="store_true",
-        help="Sirve el manifiesto heredado (source-legacy.json)",
-    )
     args = parser.parse_args()
 
-    servidor = ThreadingHTTPServer((args.bind, args.puerto), hacer_handler(args.legacy))
+    servidor = ThreadingHTTPServer((args.bind, args.puerto), hacer_handler())
     print(f"Halcon en http://{args.bind}:{args.puerto}/")
     try:
         servidor.serve_forever()

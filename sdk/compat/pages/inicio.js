@@ -25,7 +25,6 @@
  */
 
 import { create } from '../../vendor/zorzal/src/zorzal.js';
-import { app } from '../app-shim.js';
 import * as store from '../store/clientes.js';
 import { renderIcon } from '../icons.js';
 
@@ -457,11 +456,5 @@ export function mount(host) {
     },
   };
 }
-
-/**
- * Definicion de la pantalla en el registro de `app`. La factory no toca el
- * DOM: montar sigue siendo responsabilidad de quien llama a `mount`.
- */
-app.define(PAGE_ID, () => ({ mount }));
 
 export default { mount, resumen, ultimasAltas, formatearMoneda };

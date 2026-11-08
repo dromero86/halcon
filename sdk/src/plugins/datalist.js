@@ -25,7 +25,6 @@
 
 import { create, define } from '../../vendor/zorzal/src/zorzal.js';
 import { __ } from '../../compat/globals.js';
-import { app } from '../../compat/app-shim.js';
 
 /**
  * Exportacion a planilla: fuera de alcance en el port.
@@ -57,15 +56,15 @@ define('datalist', (ctx) => {
 
   /**
    * Abre el formulario con la fila elegida, como el `onItemClick` original.
-   * Solo navega si la pantalla esta registrada en `app`.
+   * Navega con el callback `props.openForm`; sin callback solo avisa.
    * @param {{ item?: Record<string, any> }} [payload]
    */
   const onSelect = (payload) => {
     const item = payload && payload.item ? payload.item : null;
     if (!item || item.folder === true) return;
     __.current[props.store] = item;
-    if (app.isDefined(props.form)) app.require(props.form);
-    else console.warn(`[datalist] la pantalla "${props.form}" no esta registrada`);
+    if (typeof props.openForm === 'function') props.openForm(item);
+    else console.warn(`[datalist] sin props.openForm: no se abre "${props.form}"`);
   };
 
   const table = create({
@@ -90,10 +89,7 @@ define('datalist', (ctx) => {
         on: {
           click: () => {
             if (typeof props.back === 'function') return props.back();
-            const session = __.get_user();
-            const destino = session !== false && session ? session.dashcenter : null;
-            if (destino && app.isDefined(destino)) app.require(destino);
-            else console.warn('[datalist] back por omision sin sesion: no hay dashcenter');
+            console.warn('[datalist] sin props.back: no se navega al dashcenter');
             return false;
           },
         },
@@ -111,8 +107,8 @@ define('datalist', (ctx) => {
         on: {
           click: () => {
             delete __.current[props.store];
-            if (app.isDefined(props.form)) app.require(props.form);
-            else console.warn(`[datalist] la pantalla "${props.form}" no esta registrada`);
+            if (typeof props.openForm === 'function') props.openForm(null);
+            else console.warn(`[datalist] sin props.openForm: no se abre "${props.form}"`);
           },
         },
       }),

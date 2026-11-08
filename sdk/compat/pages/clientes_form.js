@@ -42,7 +42,7 @@
  */
 
 import { create } from '../../vendor/zorzal/src/zorzal.js';
-import { app } from '../app-shim.js';
+import { mount as mountView } from './clientes_view.js';
 import * as store from '../store/clientes.js';
 import { ORDEN, REGLAS, validar } from '../../src/rules/clientes.js';
 
@@ -168,9 +168,8 @@ export function mount(host, options = {}) {
    */
   function back() {
     if (typeof options.onBack === 'function') return options.onBack();
-    const page = app.require('app.abm.clientes_view');
     vaciar(target);
-    return page.mount(target);
+    return mountView(target);
   }
 
   const campos = CAMPOS.map((campo) => create({ kind: 'text', ...campo }));
@@ -472,10 +471,5 @@ export function mount(host, options = {}) {
     },
   };
 }
-
-/**
- * Definicion en el registro de `app`. La factory no toca el DOM.
- */
-app.define(PAGE_ID, () => ({ mount }));
 
 export default { mount, CAMPOS };

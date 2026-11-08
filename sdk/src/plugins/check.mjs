@@ -1,17 +1,15 @@
 /**
- * Verificacion de registro de los plugins y del shim de `app`.
+ * Verificacion de registro de los plugins y de las paginas.
  *
  * Importa los tres plugins (que registran sus kinds como efecto de modulo),
- * el shim de `app.define`/`app.require`, la pantalla del dashboard, las dos
- * pantallas del ABM de clientes y el shim de sesion. Comprueba:
+ * las pantallas de la aplicacion y el shim de sesion. Comprueba:
  *
  *  - que `mainbar`, `formview` y `datalist` existen en el registro de Zorzal;
  *  - que `toExcel` sigue siendo un no-op fuera de alcance;
- *  - que `app.define` y `app.require` existen;
+ *  - que todas las paginas de `sdk/src/app/index.js` exponen `mount` y tienen
+ *    `PAGE_ID` unico;
  *  - que el dashboard, `app.abm.clientes_view` y `app.abm.clientes_form`
- *    quedaron registrados y exponen `mount`;
- *  - que una definicion se evalua una sola vez y que un nombre desconocido
- *    falla en lugar de devolver `undefined`;
+ *    exportan `mount`;
  *  - que el shim de sesion expone `usr.name`, `usr.menu`, `usr.session.enable`
  *    y `__.current`, `__.isNumber` y `__.session`;
  *  - que el store en memoria de clientes arranca con cinco filas, suma una en
@@ -33,7 +31,7 @@
  *    ultimas altas limitada a cinco filas y el montaje real de los tres
  *    widgets sobre el DOM minimo.
  *  - los cuatro estados de soporte (`app.estado.403`, `404`, `error` y
- *    `cargando`): registrados, con titulo, icono y la accion que vuelve a
+ *    `cargando`): resuelven por id, con titulo, icono y la accion que vuelve a
  *    `app.inicio`.
  *  - la accesibilidad del shell: skip link al contenido, `role="main"` en el
  *    cuerpo, `aria-current="page"` solo en el item activo del sidebar y
@@ -58,12 +56,12 @@ import './formview.js';
 import './datalist.js';
 import { toExcel } from './datalist.js';
 
-import { app } from '../../compat/app-shim.js';
+import { PAGES, findPage } from '../app/index.js';
 import { mount as mountDashboard } from '../../compat/pages/dashboard.js';
 import { mount as mountClientesView } from '../../compat/pages/clientes_view.js';
 import { mount as mountClientesForm } from '../../compat/pages/clientes_form.js';
 import * as inicio from '../../compat/pages/inicio.js';
-import { ESTADOS as ESTADOS_SOPORTE } from '../../compat/pages/estados.js';
+import { ESTADOS as ESTADOS_SOPORTE, paginaEstado } from '../../compat/pages/estados.js';
 import { usr, __ as sessionUtils } from '../../compat/session-shim.js';
 import * as clientesStore from '../../compat/store/clientes.js';
 import * as listado from '../../compat/store/clientes_listado.js';
@@ -105,58 +103,24 @@ if (exportNoop !== false) {
 }
 ok('ok toExcel: no-op devuelve false');
 
-// --- shim de app.define / app.require --------------------------------
+// --- paginas como modulos ---------------------------------------------
 
-if (typeof app.define !== 'function' || typeof app.require !== 'function') {
-  console.error('el shim de app no expone define y require');
+for (const page of PAGES) {
+  if (!page || typeof page.mount !== 'function') {
+    console.error('una pagina de sdk/src/app/index.js no expone mount');
+    process.exit(1);
+  }
+  if (typeof page.PAGE_ID !== 'string' || page.PAGE_ID.trim() === '') {
+    console.error('una pagina de sdk/src/app/index.js no declara PAGE_ID');
+    process.exit(1);
+  }
+}
+const idsPaginas = PAGES.map((page) => page.PAGE_ID);
+if (new Set(idsPaginas).size !== idsPaginas.length) {
+  console.error(`hay PAGE_ID repetidos: ${idsPaginas.join(', ')}`);
   process.exit(1);
 }
-ok('ok app.define/app.require: presentes');
-
-if (!app.isDefined('app.dashboard')) {
-  console.error('app.dashboard no quedo registrado al importar la pagina');
-  process.exit(1);
-}
-ok('ok app.dashboard: registrado');
-
-const dashboard = app.require('app.dashboard');
-if (!dashboard || typeof dashboard.mount !== 'function') {
-  console.error('app.require("app.dashboard") no devolvio un objeto con mount');
-  process.exit(1);
-}
-ok('ok app.dashboard: se puede requerir y expone mount');
-
-const otraVez = app.require('app.dashboard', () => {});
-if (otraVez !== dashboard) {
-  console.error('app.require volvio a evaluar la definicion del dashboard');
-  process.exit(1);
-}
-ok('ok app.require: devuelve el mismo resultado y acepta callback');
-
-let ejecuciones = 0;
-app.define('check.unica', () => {
-  ejecuciones += 1;
-  return { ejecuciones };
-});
-app.require('check.unica');
-app.require('check.unica');
-if (ejecuciones !== 1) {
-  console.error(`la definicion se evaluo ${ejecuciones} veces, deberia ser 1`);
-  process.exit(1);
-}
-ok('ok app.define: la definicion se evalua una sola vez');
-
-let fallo = false;
-try {
-  app.require('check.inexistente');
-} catch (error) {
-  fallo = true;
-}
-if (!fallo) {
-  console.error('app.require de un nombre desconocido deberia fallar');
-  process.exit(1);
-}
-ok('ok app.require: un nombre desconocido falla');
+ok(`ok paginas: ${idsPaginas.length} modulos con mount y PAGE_ID unico`);
 
 if (typeof mountDashboard !== 'function') {
   console.error('la pagina del dashboard no exporta mount');
@@ -170,16 +134,11 @@ for (const [id, mountFn] of [
   ['app.abm.clientes_view', mountClientesView],
   ['app.abm.clientes_form', mountClientesForm],
 ]) {
-  if (!app.isDefined(id)) {
-    console.error(`${id} no quedo registrado al importar la pagina`);
+  if (typeof mountFn !== 'function') {
+    console.error(`${id} no exporta mount`);
     process.exit(1);
   }
-  const page = app.require(id);
-  if (!page || typeof page.mount !== 'function' || typeof mountFn !== 'function') {
-    console.error(`app.require("${id}") no devolvio un objeto con mount`);
-    process.exit(1);
-  }
-  ok(`ok ${id}: registrado y expone mount`);
+  ok(`ok ${id}: exporta mount`);
 }
 
 // --- shim de sesion ---------------------------------------------------
@@ -227,7 +186,7 @@ if (typeof sessionUtils.isNumber !== 'function') {
   process.exit(1);
 }
 if (sessionUtils.isNumber('42') !== true || sessionUtils.isNumber('4x') !== false) {
-  console.error('__.isNumber no respeta la semantica de sdk/sys/core/helper.js');
+  console.error('__.isNumber no respeta la semantica numerica esperada');
   process.exit(1);
 }
 if (sessionUtils.session === undefined) {
@@ -811,16 +770,11 @@ setDocument(documento);
 
 // --- pantalla de inicio: KPI, gage y ultimas altas --------------------
 
-if (!app.isDefined(inicio.PAGE_ID)) {
-  console.error(`${inicio.PAGE_ID} no quedo registrado al importar la pagina`);
+if (typeof inicio.mount !== 'function') {
+  console.error(`${inicio.PAGE_ID} no exporta mount`);
   process.exit(1);
 }
-const paginaInicio = app.require(inicio.PAGE_ID);
-exigir(
-  Boolean(paginaInicio) && typeof paginaInicio.mount === 'function',
-  'app.require("app.inicio") no devolvio un objeto con mount'
-);
-ok('ok app.inicio: registrado y expone mount');
+ok('ok app.inicio: exporta mount');
 
 const sinClientes = inicio.resumen([]);
 exigir(
@@ -893,16 +847,16 @@ exigir(
   `los ids de los estados son ${idsEstados.join(', ')}`
 );
 for (const estado of ESTADOS_SOPORTE) {
-  const pagina = app.isDefined(estado.id) ? app.require(estado.id) : null;
-  exigir(Boolean(pagina) && typeof pagina.mount === 'function', `${estado.id} no quedo registrado con mount`);
+  const pagina = paginaEstado(estado.id);
+  exigir(Boolean(pagina) && typeof pagina.mount === 'function', `${estado.id} no resuelve a una pagina con mount`);
 }
-ok('ok estados: app.estado.403, 404, error y cargando registrados');
+ok('ok estados: app.estado.403, 404, error y cargando resuelven por id');
 
 const hostEstados = documento.createElement('div');
 documento.body.appendChild(hostEstados);
 
 for (const estado of ESTADOS_SOPORTE) {
-  const controlador = app.require(estado.id).mount(hostEstados);
+  const controlador = paginaEstado(estado.id).mount(hostEstados);
   const nodoEstado = hostEstados.querySelector(`[data-estado="${estado.codigo}"]`);
   exigir(Boolean(nodoEstado), `el estado ${estado.codigo} no monto su contenedor`);
   exigir(nodoEstado.textContent.includes(estado.titulo), `el estado ${estado.codigo} no muestra su titulo`);
@@ -915,7 +869,7 @@ for (const estado of ESTADOS_SOPORTE) {
 }
 ok('ok estados: titulo, icono y accion Volver al inicio en los cuatro');
 
-const estado404 = app.require('app.estado.404').mount(hostEstados);
+const estado404 = paginaEstado('app.estado.404').mount(hostEstados);
 estado404.accion.el.click();
 exigir(
   Boolean(hostEstados.querySelector('.hc-page--inicio')),
@@ -952,6 +906,7 @@ const panel = mountDashboard(hostPanel, {
     { id: 'app.inicio', name: 'Inicio', icon: 'dashboard' },
     { id: 'app.demo.otra', name: 'Otra', icon: 'flag' },
   ],
+  navigate: findPage,
 });
 panel.select('app.inicio');
 
@@ -1065,6 +1020,7 @@ const angosto = mountDashboard(hostAngosto, {
       items: [{ id: 'app.abm.clientes_view', name: 'Clientes' }],
     },
   ],
+  navigate: findPage,
 });
 
 exigir(angosto.drawer.isOpen() === false, 'el drawer deberia arrancar cerrado en ancho angosto');
