@@ -41,9 +41,9 @@
  *    columna en el media query de 640, la tabla de clientes tiene el
  *    contenedor con scroll horizontal y el ancho minimo, y los botones y
  *    campos declaran 44 px de alto.
- *  - la compatibilidad de navegadores: `browserslist` en `package.json` con las
- *    cuatro familias y la exclusion de IE, y el verificador `scripts/compat.mjs`
- *    sin hallazgos ni excepciones sueltas.
+ *  - la compatibilidad de navegadores: `browserslist` en `package.json` con el
+ *    baseline ES2026 (Chrome/Edge/Firefox 147+, Safari 26.4+) y el verificador
+ *    `scripts/compat.mjs` sin hallazgos ni excepciones sueltas.
  *
  * Sale 0 si todo esta y 1 si falta algo.
  *
@@ -992,19 +992,30 @@ function simularAnchoAngosto() {
  */
 function bloqueMedia(css, ancho) {
   const marca = `@media (max-width: ${ancho}px)`;
-  const inicio = css.indexOf(marca);
-  if (inicio < 0) return '';
-  const abre = css.indexOf('{', inicio);
-  if (abre < 0) return '';
-  let nivel = 0;
-  for (let indice = abre; indice < css.length; indice += 1) {
-    if (css[indice] === '{') nivel += 1;
-    else if (css[indice] === '}') {
-      nivel -= 1;
-      if (nivel === 0) return css.slice(abre + 1, indice);
+  const bloques = [];
+  let desde = 0;
+  for (;;) {
+    const inicio = css.indexOf(marca, desde);
+    if (inicio < 0) break;
+    const abre = css.indexOf('{', inicio);
+    if (abre < 0) break;
+    let nivel = 0;
+    let fin = -1;
+    for (let indice = abre; indice < css.length; indice += 1) {
+      if (css[indice] === '{') nivel += 1;
+      else if (css[indice] === '}') {
+        nivel -= 1;
+        if (nivel === 0) {
+          fin = indice;
+          break;
+        }
+      }
     }
+    if (fin < 0) break;
+    bloques.push(css.slice(abre + 1, fin));
+    desde = fin + 1;
   }
-  return '';
+  return bloques.join('\n');
 }
 
 const hostAngosto = documento.createElement('div');
@@ -1689,21 +1700,24 @@ const paquete = JSON.parse(readFileSync(join(raizRepo, 'package.json'), 'utf8'))
 exigir(Array.isArray(paquete.browserslist), 'package.json no declara browserslist');
 exigir(paquete.browserslist.length > 0, 'browserslist esta vacio');
 
-const FAMILIAS = ['Chrome', 'Edge', 'Firefox', 'Safari'];
+const FAMILIAS = [
+  { nombre: 'Chrome', patron: /Chrome\s*>=\s*147/i },
+  { nombre: 'Edge', patron: /Edge\s*>=\s*147/i },
+  { nombre: 'Firefox', patron: /Firefox\s*>=\s*147/i },
+  { nombre: 'Safari', patron: /Safari\s*>=\s*26\.4/i },
+];
 for (const familia of FAMILIAS) {
-  const consulta = paquete.browserslist.find((entrada) =>
-    new RegExp(`last\\s+2\\s+${familia}\\s+versions`, 'i').test(String(entrada))
-  );
+  const consulta = paquete.browserslist.find((entrada) => familia.patron.test(String(entrada)));
   exigir(
     consulta !== undefined,
-    `browserslist no pide las ultimas 2 versiones de ${familia} (${paquete.browserslist.join(' | ')})`
+    `browserslist no declara ${familia.nombre} en el baseline ES2026 (${paquete.browserslist.join(' | ')})`
   );
 }
 exigir(
-  paquete.browserslist.some((entrada) => /not\s+ie\b/i.test(String(entrada))),
-  `browserslist no excluye Internet Explorer (${paquete.browserslist.join(' | ')})`
+  !paquete.browserslist.some((entrada) => /\bie\b/i.test(String(entrada))),
+  `browserslist menciona Internet Explorer (${paquete.browserslist.join(' | ')})`
 );
-ok(`ok compat: browserslist declara las ultimas 2 versiones de ${FAMILIAS.join(', ')} y excluye IE`);
+ok('ok compat: browserslist declara el baseline ES2026 (Chrome/Edge/Firefox 147+, Safari 26.4+)');
 
 exigir(REGLAS_COMPAT.length >= 5, `el verificador de compatibilidad declara ${REGLAS_COMPAT.length} reglas`);
 const informeCompat = revisarCompat();

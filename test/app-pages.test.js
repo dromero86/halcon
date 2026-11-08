@@ -72,17 +72,12 @@ test('paginaEstado envuelve el estado con mount', () => {
 });
 
 test('la ruta moderna no vuelve a usar app.define, app.require ni app.isDefined', () => {
-  const exentos = new Set([
-    // Shim previo a la fase 1; queda hasta que se borre el archivo.
-    'sdk/compat/app-shim.js',
-  ]);
   const patrones = [/app\.define\s*\(/, /app\.require\s*\(/, /app\.isDefined\s*\(/];
   const hallazgos = [];
 
   for (const dir of ['sdk/src', 'sdk/compat']) {
     for (const ruta of archivos(join(ROOT, dir))) {
       const relativa = relative(ROOT, ruta).split('\\').join('/');
-      if (exentos.has(relativa)) continue;
       const texto = readFileSync(ruta, 'utf8');
       for (const patron of patrones) {
         if (patron.test(texto)) hallazgos.push(`${relativa}: ${patron}`);
