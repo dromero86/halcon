@@ -1,9 +1,8 @@
 /**
  * Plugin `mainbar` como kind de Zorzal.
  *
- * Origen: `sdk/sys/plugins/mainbar.js`. El port conserva la estructura del
- * original: una toolbar con el logo, el boton que colapsa la barra lateral, la
- * caja de busqueda y el boton de opciones.
+ * Conserva la estructura original: una toolbar con el logo, el boton que
+ * colapsa la barra lateral, la caja de busqueda y el boton de opciones.
  *
  * El kind se registra con `define('mainbar', factory)`. El factory arma una
  * `toolbar` de Zorzal: los botones son items del toolbar (por eso salen como

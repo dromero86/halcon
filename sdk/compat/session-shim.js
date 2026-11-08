@@ -1,10 +1,9 @@
 /**
  * Shim de sesion para el piloto de Halcon.
  *
- * Origen: `usr` y `__` los arma el backend PHP (config del tenant) y
- * `sdk/sys/core/session.js` los usa para validar la sesion contra el servidor.
- * Nada de eso existe en el piloto: no hay backend, no hay PHP y no hay
- * `sys.core.session`.
+ * En la version con backend, `usr` y `__` los arma el servidor y los usa un
+ * modulo de sesion que valida contra el servidor. Nada de eso existe en el
+ * piloto: no hay backend ni validacion remota.
  *
  * Este modulo completa los stubs de `compat/globals.js` en el mismo objeto
  * (misma identidad), para que el dashboard y los plugins que ya importan
@@ -15,7 +14,7 @@
  *  - `usr.session`: `{ enable, login, check, logout, key }`, con la forma de
  *    `sdk/config/app.json`.
  *  - `__.current`: cache de seleccion por store (viene de `globals.js`).
- *  - `__.isNumber(n)`: misma semantica que `sdk/sys/core/helper.js`.
+ *  - `__.isNumber(n)`: verdadero solo para numeros finitos.
  *  - `__.session`: stub del modulo de sesion; no valida nada contra el
  *    servidor.
  *

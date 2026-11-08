@@ -1,9 +1,8 @@
 /**
  * Plugin `datalist` como kind de Zorzal.
  *
- * Origen: `sdk/sys/plugins/datalist.js`. El port conserva la barra de
- * herramientas, el alta y la navegacion al formulario, la carga por `query` /
- * `url` / `json` y el guard de "cargar una sola vez".
+ * Conserva la barra de herramientas, el alta y la navegacion al formulario, la
+ * carga por `query` / `url` / `json` y el guard de "cargar una sola vez".
  *
  * El kind se registra con `define('datalist', factory)` y arma un `layout`
  * vertical con una `toolbar` y el widget de datos (`datatable` por omision, o

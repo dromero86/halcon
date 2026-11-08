@@ -227,7 +227,7 @@
         return project + value;
     }
 
-    /** Nombre de modulo heredado: `sys/core/helper.js` -> `sys.core.helper`. */
+    /** Id del recurso derivado de su URL: `sys/core/helper.js` -> `sys.core.helper`. */
     function getModule(url) {
         var value = String(url == null ? '' : url).split('#')[0].split('?')[0];
         var project = config.project || '';

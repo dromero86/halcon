@@ -1,9 +1,8 @@
 /**
  * Plugin `formview` como kind de Zorzal.
  *
- * Origen: `sdk/sys/plugins/formview.js`. El port conserva la estructura, los
- * setters, los eventos (`formReady` y `onFormSubmmited`), la validacion previa
- * al guardado y `mobile_input`.
+ * Conserva la estructura, los setters, los eventos (`formReady` y
+ * `onFormSubmmited`), la validacion previa al guardado y `mobile_input`.
  *
  * El kind se registra con `define('formview', factory)` y arma un `layout`
  * vertical con un `form` de Zorzal: la toolbar interior (volver, titulo,

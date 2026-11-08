@@ -1,12 +1,10 @@
 /**
  * Dashboard de Halcon sobre el widget set de Zorzal.
  *
- * Origen: `sdk/app/dashboard.js` (SDK heredado + `sdk/sys/plugins/sidebar.js`). El
- * original montaba un layout vertical con el `mainbar` arriba y, abajo, el
- * sidebar a la izquierda y el area de contenido a la derecha; al hacer clic en
- * un item resolvia la pantalla por id con el registro de modulos heredado y
- * mantenia un popup "Submenu". Este modulo resuelve la pantalla con el callback
- * `navigate` que recibe en las opciones y mantiene el popup "Submenu".
+ * Monta un layout vertical con el `mainbar` arriba y, abajo, el sidebar a la
+ * izquierda y el area de contenido a la derecha. Al hacer clic en un item
+ * resuelve la pantalla con el callback `navigate` que recibe en las opciones y
+ * mantiene el popup "Submenu".
  *
  * Este modulo arma el mismo shell con los widgets de Zorzal y guarda la
  * referencia de cada uno:
